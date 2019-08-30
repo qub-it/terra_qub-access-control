@@ -1,0 +1,62 @@
+package com.qubit.terra.qubAccessControl.domain;
+external class .pt.ist.fenixframework.DomainRoot;
+
+class AccessControlProfileType  {
+ String name  (REQUIRED) ; 
+}
+class AccessControlProfile  {
+ String name  (REQUIRED) ; 
+ String code  (REQUIRED) ;
+}
+class AccessControlOperationPermission  {
+ String code  (REQUIRED) ; 
+}
+relation DomainRootprofilesAccessControlProfile {
+	AccessControlProfile playsRole profiles{
+		multiplicity *;	
+	}
+	.pt.ist.fenixframework.DomainRoot playsRole domainRoot;
+}
+relation DomainRootprofileTypesAccessControlProfileType {
+	AccessControlProfileType playsRole profileTypes{
+		multiplicity *;	
+	}
+	.pt.ist.fenixframework.DomainRoot playsRole domainRoot;
+}
+relation DomainRootOperationPermissionsAccessControlOperationPermission {
+	AccessControlOperationPermission playsRole OperationPermissions{
+		multiplicity *;	
+	}
+	.pt.ist.fenixframework.DomainRoot playsRole domainRoot;
+}
+
+
+
+relation AccessControlProfileTypeprofilesAccessControlProfile {
+	AccessControlProfile playsRole profiles{
+		multiplicity *;	
+	}
+	AccessControlProfileType playsRole type;
+}
+
+
+
+
+relation ParentChildRelation {
+	AccessControlProfile playsRole child {
+		multiplicity *;	
+	}
+	AccessControlProfile   playsRole parent {
+		multiplicity *;	
+	}
+}
+relation OperationPermissionProfileRelation {
+	AccessControlOperationPermission playsRole operationPermission {
+		multiplicity *;	
+	}
+	AccessControlProfile   playsRole profile {
+		multiplicity *;	
+	}
+}
+
+
