@@ -5,8 +5,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.taglibs.string.GetChompTag;
 import org.fenixedu.bennu.core.domain.User;
-
+import org.fenixedu.bennu.portal.model.Application;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
@@ -27,7 +28,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             manager.setName("Gestor de Permissoes");
             manager.setCode(MANAGER);
             manager.setType(AccessControlProfileType.findByName(MANAGER));
-            manager.addOperationPermission(AccessControlOperationPermission.AUTHORIZATION_MANAGER());
+            manager.addPermission(AccessControlPermission.AUTHORIZATION_MANAGER());
         }
     }
     
@@ -75,7 +76,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         }
 
         getChildSet().forEach(child -> removeChild(child));
-        getOperationPermissionSet().forEach(operationPermission -> removeOperationPermission(operationPermission));
+        getPermissionSet().forEach(permission -> removePermission(permission));
 
         setDomainRoot(null);
         setType(null);
@@ -122,18 +123,17 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         addParents(parents, this);
         return parents;
     }
-
-    
+  
     @Override
     @Atomic(mode = TxMode.WRITE)
-    public void addOperationPermission(AccessControlOperationPermission operationPermission) {
-        super.addOperationPermission(operationPermission);
+    public void addPermission(AccessControlPermission permission) {
+        super.addPermission(permission);
     }
  
     @Override
     @Atomic(mode = TxMode.WRITE)
-    public void removeOperationPermission(AccessControlOperationPermission operationPermission) {
-        super.removeOperationPermission(operationPermission);
+    public void removePermission(AccessControlPermission permission) {
+        super.removePermission(permission);
     }
     
     @Override

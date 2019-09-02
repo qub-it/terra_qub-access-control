@@ -7,8 +7,9 @@ class AccessControlProfileType  {
 class AccessControlProfile  {
  String name  (REQUIRED) ; 
  String code  (REQUIRED) ;
+ String customExpression ;
 }
-class AccessControlOperationPermission  {
+class AccessControlPermission  {
  String code  (REQUIRED) ; 
 }
 relation DomainRootprofilesAccessControlProfile {
@@ -23,8 +24,8 @@ relation DomainRootprofileTypesAccessControlProfileType {
 	}
 	.pt.ist.fenixframework.DomainRoot playsRole domainRoot;
 }
-relation DomainRootOperationPermissionsAccessControlOperationPermission {
-	AccessControlOperationPermission playsRole OperationPermissions{
+relation DomainRootOperationPermissionsAccessControlPermission {
+	AccessControlPermission playsRole permissions{
 		multiplicity *;	
 	}
 	.pt.ist.fenixframework.DomainRoot playsRole domainRoot;
@@ -50,8 +51,8 @@ relation ParentChildRelation {
 		multiplicity *;	
 	}
 }
-relation OperationPermissionProfileRelation {
-	AccessControlOperationPermission playsRole operationPermission {
+relation PermissionProfileRelation {
+	AccessControlPermission playsRole permission {
 		multiplicity *;	
 	}
 	AccessControlProfile   playsRole profile {

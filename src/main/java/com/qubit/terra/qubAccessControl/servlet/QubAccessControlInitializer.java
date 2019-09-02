@@ -4,7 +4,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import com.qubit.terra.qubAccessControl.domain.AccessControlOperationPermission;
+import com.qubit.terra.qubAccessControl.domain.AccessControlPermission;
 import com.qubit.terra.qubAccessControl.domain.AccessControlProfile;
 import com.qubit.terra.qubAccessControl.domain.AccessControlProfileType;
 
@@ -36,7 +36,7 @@ public class QubAccessControlInitializer implements ServletContextListener {
             // 21 August 2019 - Daniel Pires
             //
             AccessControlProfileType.initialize();
-            AccessControlOperationPermission.initialize();
+            AccessControlPermission.initialize();
             AccessControlProfile.initialize();
         }
         

@@ -8,31 +8,31 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
-public class AccessControlOperationPermission extends AccessControlOperationPermission_Base {
+public class AccessControlPermission extends AccessControlPermission_Base {
     
-    static public AccessControlOperationPermission AUTHORIZATION_MANAGER() {
-        return AccessControlOperationPermission.findByCode("AUTHORIZATION_MANAGER");
+    static public AccessControlPermission AUTHORIZATION_MANAGER() {
+        return AccessControlPermission.findByCode("AUTHORIZATION_MANAGER");
     }
 
     static public void initialize() {
         if (AUTHORIZATION_MANAGER() == null) {
-            final AccessControlOperationPermission manager = new AccessControlOperationPermission();
+            final AccessControlPermission manager = new AccessControlPermission();
             manager.setCode("AUTHORIZATION_MANAGER");
         }
     }
     
-    public AccessControlOperationPermission() {
+    public AccessControlPermission() {
         super();
         setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
     }
     
-    public static AccessControlOperationPermission findByCode(String code) {
+    public static AccessControlPermission findByCode(String code) {
         return findAll().stream()
                 .filter(op -> op.getCode().equals(code)).findFirst().orElse(null);
     }
     
-    public static Set<AccessControlOperationPermission> findAll(){
-        return FenixFramework.getDomainRoot().getOperationPermissionsSet();
+    public static Set<AccessControlPermission> findAll(){
+        return FenixFramework.getDomainRoot().getPermissionsSet();
     }
 
     @pt.ist.fenixframework.Atomic
