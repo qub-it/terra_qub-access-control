@@ -5,13 +5,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.taglibs.string.GetChompTag;
-import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.portal.model.Application;
-
 import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.Atomic.TxMode;
+import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlProfile extends AccessControlProfile_Base {
 
