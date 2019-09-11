@@ -11,7 +11,6 @@ import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlProfile extends AccessControlProfile_Base {
 
-    
     private static final String MANAGER = "manager";
 
     static public AccessControlProfile manager() {
@@ -27,7 +26,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             manager.addPermission(AccessControlPermission.AUTHORIZATION_MANAGER());
         }
     }
-    
+
     public AccessControlProfile() {
         super();
         setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
@@ -47,20 +46,20 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     @Override
     public void setName(String name) {
         super.setName(name);
-        setUUIDCode();
+        if (super.getCode() == null || super.getCode().isEmpty()) {
+            setUUIDCode();
+        }
     }
-    
+
     public static AccessControlProfile findByName(String name) {
-        return findAll().stream()
-                .filter((AccessControlProfile p) -> p.getName().equals(name)).findFirst().orElse(null);
+        return findAll().stream().filter((AccessControlProfile p) -> p.getName().equals(name)).findFirst().orElse(null);
     }
-    
+
     public static AccessControlProfile findByCode(String code) {
-        return findAll().stream()
-                .filter((AccessControlProfile p) -> p.getCode().equals(code)).findFirst().orElse(null);
+        return findAll().stream().filter((AccessControlProfile p) -> p.getCode().equals(code)).findFirst().orElse(null);
     }
-    
-    public static Set<AccessControlProfile> findAll(){
+
+    public static Set<AccessControlProfile> findAll() {
         return FenixFramework.getDomainRoot().getProfilesSet();
     }
 
@@ -108,42 +107,42 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
         return true;
     }
-    
+
     private void addParents(Set<AccessControlProfile> setOfParents, AccessControlProfile profile) {
         setOfParents.addAll(profile.getParentSet());
         profile.getParentSet().forEach(p -> addParents(setOfParents, p));
     }
-    
+
     public Set<AccessControlProfile> findAllParents() {
         Set<AccessControlProfile> parents = new HashSet<>();
         addParents(parents, this);
         return parents;
     }
-  
+
     @Override
     @Atomic(mode = TxMode.WRITE)
     public void addPermission(AccessControlPermission permission) {
         super.addPermission(permission);
     }
- 
+
     @Override
     @Atomic(mode = TxMode.WRITE)
     public void removePermission(AccessControlPermission permission) {
         super.removePermission(permission);
     }
-    
+
     @Override
     @Atomic(mode = TxMode.WRITE)
     public void addParent(AccessControlProfile parent) {
         super.addParent(parent);
     }
-    
+
     @Override
     @Atomic(mode = TxMode.WRITE)
     public void removeParent(AccessControlProfile parent) {
         super.removeParent(parent);
     }
-    
+
     @Override
     @Atomic(mode = TxMode.WRITE)
     public void removeChild(AccessControlProfile child) {
