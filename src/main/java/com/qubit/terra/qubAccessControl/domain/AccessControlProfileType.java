@@ -40,14 +40,14 @@ public class AccessControlProfileType extends AccessControlProfileType_Base {
     }
     
     
-    @pt.ist.fenixframework.Atomic
-    public void delete() {
-        if (!getProfilesSet().isEmpty()) {
-            throw new IllegalStateException("You cannot delete a profile type that has profiles associated. Associated profiles are: " +
-                    getProfilesSet().stream().map(profile -> profile.getName()).collect(Collectors.joining(",")));
-        }
-        setDomainRoot(null);
-        super.deleteDomainObject();
-    }
+//    @pt.ist.fenixframework.Atomic
+//    public void delete() {
+//        if (!getProfilesSet().isEmpty()) {
+//            throw new IllegalStateException("You cannot delete a profile type that has profiles associated. Associated profiles are: " +
+//                    getProfilesSet().stream().map(profile -> profile.getName()).collect(Collectors.joining(",")));
+//        }
+//        setDomainRoot(null);
+//        super.deleteDomainObject();
+//    }
     
 }

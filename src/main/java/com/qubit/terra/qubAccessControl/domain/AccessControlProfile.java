@@ -5,52 +5,74 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
+import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
+
 import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlProfile extends AccessControlProfile_Base {
 
-    private static final String MANAGER = "manager";
+    private static final String MANAGER_CODE = AccessControlBundle.accessControlBundle("AccessControlProfile.manager.code");
+    private static final String MANAGER_NAME = AccessControlBundle.accessControlBundle("AccessControlProfile.manager.name");
 
     static public AccessControlProfile manager() {
-        return AccessControlProfile.findByCode(MANAGER);
+        return AccessControlProfile.findByCode(MANAGER_CODE);
     }
-
+    
     static public void initialize() {
-        if (AccessControlProfile.manager() == null) {
-            final AccessControlProfile manager = new AccessControlProfile();
-            manager.setName("Gestor de Permissoes");
-            manager.setCode(MANAGER);
-            manager.setType(AccessControlProfileType.findByName(MANAGER));
-            manager.addPermission(AccessControlPermission.AUTHORIZATION_MANAGER());
+        if (findAll().isEmpty()) {
+            final AccessControlProfile manager = create(MANAGER_NAME, MANAGER_CODE, "", false);
+            manager.addPermission(AccessControlPermission.manager());
         }
     }
 
-    public AccessControlProfile() {
+    protected AccessControlProfile() {
         super();
         setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
     }
-
-    // This method makes it possible to create 
-    // a random unique identifier for the profile.
-    // It doesn't override the setCode method so it's
-    // possible to create a custom code.
-    //
-    // 27 August 2019 - Daniel Pires
-    //
-    public void setUUIDCode() {
-        super.setCode(UUID.randomUUID().toString());
+    
+    protected AccessControlProfile(String name, String code, String customExpression, Boolean manager) {
+    	this();
+    	setName(name);
+    	setCode(code);
+    	setCustomExpression(customExpression);
+    	setManager(manager);
+    	checkRules();
     }
-
-    @Override
-    public void setName(String name) {
-        super.setName(name);
-        if (super.getCode() == null || super.getCode().isEmpty()) {
-            setUUIDCode();
-        }
+    
+    protected AccessControlProfile(String name, String customExpression, Boolean manager) {
+    	this();
+    	setName(name);
+    	setCode(UUID.randomUUID().toString());
+    	setCustomExpression(customExpression);
+    	setManager(manager);
+    	checkRules();
     }
-
+    
+    public static AccessControlProfile create(String name, String code, String customExpression, Boolean manager) {
+    	if(code == null) {
+    		return new AccessControlProfile(name, customExpression, manager);
+    	}
+    	return new AccessControlProfile(name, code, customExpression, manager);
+    }
+    
+    private void checkRules() {
+    	if(getDomainRoot() == null) {
+			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.domainRoot.required"));
+		}
+    	
+		if(getName() == null) {
+			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.AccessControlProfile.name.required"));
+		}
+		
+		if(getCode() == null) {
+			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.AccessControlProfile.code.required"));
+		}
+		
+		if(getManager() == null) {
+			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.AccessControlProfile.manager.required"));
+		}
+	}
+    
     public static AccessControlProfile findByName(String name) {
         return findAll().stream().filter((AccessControlProfile p) -> p.getName().equals(name)).findFirst().orElse(null);
     }
@@ -62,11 +84,15 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     public static Set<AccessControlProfile> findAll() {
         return FenixFramework.getDomainRoot().getProfilesSet();
     }
+    
+    public Boolean isManager() {
+    	return getManager();
+    }
 
     @pt.ist.fenixframework.Atomic
     public void delete() {
         if (!getParentSet().isEmpty()) {
-            throw new IllegalStateException("You cannot delete a profile that has parent profiles. Parent profiles are: {0}"
+            throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.AccessControlProfile.delete")
                     + getParentSet().stream().map(profile -> profile.getName()).collect(Collectors.joining(",")));
         }
 
@@ -74,12 +100,10 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         getPermissionSet().forEach(permission -> removePermission(permission));
 
         setDomainRoot(null);
-        setType(null);
         super.deleteDomainObject();
     }
 
     @Override
-    @pt.ist.fenixframework.Atomic
     public void addChild(AccessControlProfile child) {
         if (validate(child)) {
             super.addChild(child);
@@ -95,57 +119,31 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         // there's a parentProfile path starting in this profile that reaches child 
         //
         // 14 August 2019 - Paulo Abrantes && Daniel Pires
-
+    	
         if (child == this) {
-            throw new IllegalArgumentException("Unable to add profile " + getName() + " to itself");
+        	throw new IllegalArgumentException(AccessControlBundle.accessControlBundle("error.AccessControlProfile.addProfileToItself", getName()));
         }
 
         if (findAllParents().contains(child)) {
-            throw new IllegalArgumentException("Unable to add profile " + child.getName() + " to " + getName() + " because "
-                    + getName() + " is already a parent of" + child.getName());
+            throw new IllegalArgumentException(AccessControlBundle.accessControlBundle("error.AccessControlProfile.treeCycle", getName(), child.getName()));
         }
 
         return true;
     }
 
-    private void addParents(Set<AccessControlProfile> setOfParents, AccessControlProfile profile) {
-        setOfParents.addAll(profile.getParentSet());
-        profile.getParentSet().forEach(p -> addParents(setOfParents, p));
-    }
 
     public Set<AccessControlProfile> findAllParents() {
         Set<AccessControlProfile> parents = new HashSet<>();
-        addParents(parents, this);
+        parents.addAll(addParents(this));
         return parents;
     }
 
-    @Override
-    @Atomic(mode = TxMode.WRITE)
-    public void addPermission(AccessControlPermission permission) {
-        super.addPermission(permission);
+    private Set<AccessControlProfile> addParents(AccessControlProfile profile) {
+        Set<AccessControlProfile> parents = new HashSet<>();
+        parents.addAll(profile.getParentSet());
+        profile.getParentSet().forEach( p -> parents.addAll(addParents(p)));
+        return parents;
     }
+    
 
-    @Override
-    @Atomic(mode = TxMode.WRITE)
-    public void removePermission(AccessControlPermission permission) {
-        super.removePermission(permission);
-    }
-
-    @Override
-    @Atomic(mode = TxMode.WRITE)
-    public void addParent(AccessControlProfile parent) {
-        super.addParent(parent);
-    }
-
-    @Override
-    @Atomic(mode = TxMode.WRITE)
-    public void removeParent(AccessControlProfile parent) {
-        super.removeParent(parent);
-    }
-
-    @Override
-    @Atomic(mode = TxMode.WRITE)
-    public void removeChild(AccessControlProfile child) {
-        super.removeChild(child);
-    }
 }

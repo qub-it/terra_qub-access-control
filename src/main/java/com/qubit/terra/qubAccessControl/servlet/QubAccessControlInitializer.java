@@ -35,7 +35,7 @@ public class QubAccessControlInitializer implements ServletContextListener {
             //
             // 21 August 2019 - Daniel Pires
             //
-            AccessControlProfileType.initialize();
+//            AccessControlProfileType.initialize();
             AccessControlPermission.initialize();
             AccessControlProfile.initialize();
         }

@@ -7,6 +7,7 @@ class AccessControlProfileType  {
 class AccessControlProfile  {
  String name  (REQUIRED) ; 
  String code  (REQUIRED) ;
+ Boolean manager (REQUIRED) ; 
  String customExpression ;
 }
 class AccessControlPermission  {
@@ -33,12 +34,12 @@ relation DomainRootOperationPermissionsAccessControlPermission {
 
 
 
-relation AccessControlProfileTypeprofilesAccessControlProfile {
-	AccessControlProfile playsRole profiles{
-		multiplicity *;	
-	}
-	AccessControlProfileType playsRole type;
-}
+//relation AccessControlProfileTypeprofilesAccessControlProfile {
+//	AccessControlProfile playsRole profiles{
+//		multiplicity *;	
+//	}
+//	AccessControlProfileType playsRole type;
+//}
 
 
 
