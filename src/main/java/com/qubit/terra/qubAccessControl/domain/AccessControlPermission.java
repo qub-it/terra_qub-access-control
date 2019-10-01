@@ -9,15 +9,16 @@ import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlPermission extends AccessControlPermission_Base {
 
-	private static final String AUTHORIZATION_MANAGER = AccessControlBundle.accessControlBundle("AccessControlPermission.manager");
-	
+	private static final String AUTHORIZATION_MANAGER = AccessControlBundle
+			.accessControlBundle("AccessControlPermission.manager");
+
 	static public AccessControlPermission manager() {
 		return AccessControlPermission.findByCode(AUTHORIZATION_MANAGER);
 	}
 
 	static public void initialize() {
 		if (findAll().isEmpty()) {
-			create(AUTHORIZATION_MANAGER);
+			create(AUTHORIZATION_MANAGER, true, AUTHORIZATION_MANAGER);
 		}
 	}
 
@@ -26,8 +27,10 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 		setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
 	}
 
-	protected AccessControlPermission(String code) {
+	protected AccessControlPermission(String rawName, Boolean restricted, String code) {
 		this();
+		setRawName(rawName);
+		setRestricted(restricted);
 		setCode(code);
 		checkRules();
 	}
@@ -37,13 +40,22 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.domainRoot.required"));
 		}
 
+		if (getRawName() == null) {
+			throw new IllegalStateException(
+					AccessControlBundle.accessControlBundle("error.AccessControlPermission.rawName.required"));
+		}
+		if (getRestricted() == null) {
+			throw new IllegalStateException(
+					AccessControlBundle.accessControlBundle("error.AccessControlPermission.restricted.required"));
+		}
 		if (getCode() == null) {
-			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.AccessControlPermission.code.required"));
+			throw new IllegalStateException(
+					AccessControlBundle.accessControlBundle("error.AccessControlPermission.code.required"));
 		}
 	}
 
-	public static AccessControlPermission create(String code) {
-		return new AccessControlPermission(code);
+	public static AccessControlPermission create(String rawName, Boolean restricted, String code) {
+		return new AccessControlPermission(rawName, restricted, code);
 	}
 
 	public static AccessControlPermission findByCode(String code) {
@@ -57,9 +69,9 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 	@pt.ist.fenixframework.Atomic
 	public void delete() {
 		if (!getProfileSet().isEmpty()) {
-			throw new IllegalStateException( AccessControlBundle.accessControlBundle("error.AccessControlPermission.delete")
-							+ getProfileSet().stream().map(profile -> profile.getName())
-									.collect(Collectors.joining(",")));
+			throw new IllegalStateException(
+					AccessControlBundle.accessControlBundle("error.AccessControlPermission.delete") + getProfileSet()
+							.stream().map(profile -> profile.getRawName()).collect(Collectors.joining(",")));
 		}
 
 		setDomainRoot(null);
@@ -68,6 +80,10 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 
 	public String getExpression() {
 		return "permission(" + getCode() + ")";
+	}
+
+	public boolean isRestricted() {
+		return getRestricted();
 	}
 
 }

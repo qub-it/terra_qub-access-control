@@ -5,14 +5,17 @@ class AccessControlProfileType  {
  String name  (REQUIRED) ; 
 }
 class AccessControlProfile  {
- String name  (REQUIRED) ; 
+ String rawName (REQUIRED) ; 
  String code  (REQUIRED) ;
- Boolean manager (REQUIRED) ; 
+ Boolean restricted (REQUIRED) ; 
  String customExpression ;
 }
 class AccessControlPermission  {
  String code  (REQUIRED) ; 
+ String rawName (REQUIRED) ; 
+ Boolean restricted (REQUIRED) ;
 }
+
 relation DomainRootprofilesAccessControlProfile {
 	AccessControlProfile playsRole profiles{
 		multiplicity *;	
