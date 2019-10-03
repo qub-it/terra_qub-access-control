@@ -11,10 +11,8 @@ import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlProfile extends AccessControlProfile_Base {
 
-	private static final String MANAGER_CODE = AccessControlBundle
-			.accessControlBundle("AccessControlProfile.manager.code");
-	private static final String MANAGER_NAME = AccessControlBundle
-			.accessControlBundle("AccessControlProfile.manager.name");
+	private static final String MANAGER_CODE = AccessControlBundle.get("AccessControlProfile.manager.code");
+	private static final String MANAGER_NAME = AccessControlBundle.localizedString("AccessControlProfile.manager.name");
 
 	static public AccessControlProfile manager() {
 		return AccessControlProfile.findByCode(MANAGER_CODE);
@@ -60,22 +58,19 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
 	private void checkRules() {
 		if (getDomainRoot() == null) {
-			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.domainRoot.required"));
+			throw new IllegalStateException(AccessControlBundle.get("error.domainRoot.required"));
 		}
 
 		if (getRawName() == null) {
-			throw new IllegalStateException(
-					AccessControlBundle.accessControlBundle("error.AccessControlProfile.name.required"));
+			throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.name.required"));
 		}
 
 		if (getCode() == null) {
-			throw new IllegalStateException(
-					AccessControlBundle.accessControlBundle("error.AccessControlProfile.code.required"));
+			throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.code.required"));
 		}
 
 		if (getRestricted() == null) {
-			throw new IllegalStateException(
-					AccessControlBundle.accessControlBundle("error.AccessControlProfile.manager.required"));
+			throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.manager.required"));
 		}
 	}
 
@@ -92,14 +87,14 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 		return FenixFramework.getDomainRoot().getProfilesSet();
 	}
 
-	public boolean isRestricted() {
+	public Boolean isRestricted() {
 		return getRestricted();
 	}
 
 	@pt.ist.fenixframework.Atomic
 	public void delete() {
 		if (!getParentSet().isEmpty()) {
-			throw new IllegalStateException(AccessControlBundle.accessControlBundle("error.AccessControlProfile.delete")
+			throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.delete")
 					+ getParentSet().stream().map(profile -> profile.getRawName()).collect(Collectors.joining(",")));
 		}
 
@@ -128,13 +123,13 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 		// 14 August 2019 - Paulo Abrantes && Daniel Pires
 
 		if (child == this) {
-			throw new IllegalArgumentException(AccessControlBundle
-					.accessControlBundle("error.AccessControlProfile.addProfileToItself", getRawName()));
+			throw new IllegalArgumentException(
+					AccessControlBundle.get("error.AccessControlProfile.addProfileToItself", getRawName()));
 		}
 
 		if (findAllParents().contains(child)) {
-			throw new IllegalArgumentException(AccessControlBundle
-					.accessControlBundle("error.AccessControlProfile.treeCycle", getRawName(), child.getRawName()));
+			throw new IllegalArgumentException(
+					AccessControlBundle.get("error.AccessControlProfile.treeCycle", getRawName(), child.getRawName()));
 		}
 
 		return true;
