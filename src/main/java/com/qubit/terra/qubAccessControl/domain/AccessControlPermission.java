@@ -55,7 +55,13 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 	}
 
 	public static AccessControlPermission create(String rawName, Boolean restricted, String code) {
-		return new AccessControlPermission(rawName, restricted, code);
+		if (findByCode(code) == null) {
+			return new AccessControlPermission(rawName, restricted, code);
+		} else {
+			throw new IllegalArgumentException(
+					AccessControlBundle.get("error.AccessControlPermission.code.exists", code));
+		}
+
 	}
 
 	public static AccessControlPermission findByCode(String code) {

@@ -52,6 +52,8 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 			Boolean restricted) {
 		if (code == null) {
 			return new AccessControlProfile(rawName, customExpression, restricted);
+		} else if (findByCode(code) != null) {
+			throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlProfile.code.exists", code));
 		}
 		return new AccessControlProfile(rawName, code, customExpression, restricted);
 	}
