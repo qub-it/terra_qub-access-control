@@ -81,7 +81,7 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 		return "permission(" + getCode() + ")";
 	}
 
-	public boolean isRestricted() {
+	public Boolean isRestricted() {
 		return getRestricted();
 	}
 
