@@ -1,2 +1,6 @@
+- Refactor: Changed the name from string to localizedString of profile and permissions
+- Refactor: Changed manager to restricted
+- Improvement: Verify if code already exists, for profile and permission creation
+
 1.0.0 (25-09-2019)
 - Initial version release
