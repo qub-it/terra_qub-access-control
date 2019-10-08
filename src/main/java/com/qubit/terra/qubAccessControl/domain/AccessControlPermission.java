@@ -20,7 +20,7 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 
 	static public void initialize() {
 		if (findAll().isEmpty()) {
-			create(AUTHORIZATION_MANAGER_NAME, true, AUTHORIZATION_MANAGER_CODE);
+			create(AUTHORIZATION_MANAGER_NAME, true, AUTHORIZATION_MANAGER_CODE, false);
 		}
 	}
 
@@ -29,11 +29,12 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 		setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
 	}
 
-	protected AccessControlPermission(String rawName, Boolean restricted, String code) {
+	protected AccessControlPermission(String rawName, Boolean restricted, String code, Boolean locked) {
 		this();
 		setRawName(rawName);
 		setRestricted(restricted);
 		setCode(code);
+		setLocked(locked);
 		checkRules();
 	}
 
@@ -52,11 +53,15 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 		if (getCode() == null) {
 			throw new IllegalStateException(AccessControlBundle.get("error.AccessControlPermission.code.required"));
 		}
+		if (getLocked() == null) {
+			throw new IllegalStateException(
+					AccessControlBundle.get("error.AccessControlPermission.restricted.required"));
+		}
 	}
 
-	public static AccessControlPermission create(String rawName, Boolean restricted, String code) {
+	public static AccessControlPermission create(String rawName, Boolean restricted, String code, Boolean locked) {
 		if (findByCode(code) == null) {
-			return new AccessControlPermission(rawName, restricted, code);
+			return new AccessControlPermission(rawName, restricted, code, locked);
 		} else {
 			throw new IllegalArgumentException(
 					AccessControlBundle.get("error.AccessControlPermission.code.exists", code));
@@ -91,4 +96,7 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 		return getRestricted();
 	}
 
+	public Boolean isLocked() {
+		return getLocked();
+	}
 }

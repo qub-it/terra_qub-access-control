@@ -20,7 +20,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
 	static public void initialize() {
 		if (findAll().isEmpty()) {
-			final AccessControlProfile manager = create(MANAGER_NAME, MANAGER_CODE, "", true);
+			final AccessControlProfile manager = create(MANAGER_NAME, MANAGER_CODE, "", true, false);
 			manager.addPermission(AccessControlPermission.manager());
 		}
 	}
@@ -30,32 +30,35 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 		setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
 	}
 
-	protected AccessControlProfile(String rawName, String code, String customExpression, Boolean restricted) {
+	protected AccessControlProfile(String rawName, String code, String customExpression, Boolean restricted,
+			Boolean locked) {
 		this();
 		setRawName(rawName);
 		setCode(code);
 		setCustomExpression(customExpression);
 		setRestricted(restricted);
+		setLocked(locked);
 		checkRules();
 	}
 
-	protected AccessControlProfile(String rawName, String customExpression, Boolean restricted) {
+	protected AccessControlProfile(String rawName, String customExpression, Boolean restricted, Boolean locked) {
 		this();
 		setRawName(rawName);
 		setCode(UUID.randomUUID().toString());
 		setCustomExpression(customExpression);
 		setRestricted(restricted);
+		setLocked(locked);
 		checkRules();
 	}
 
-	public static AccessControlProfile create(String rawName, String code, String customExpression,
-			Boolean restricted) {
+	public static AccessControlProfile create(String rawName, String code, String customExpression, Boolean restricted,
+			Boolean locked) {
 		if (code == null) {
-			return new AccessControlProfile(rawName, customExpression, restricted);
+			return new AccessControlProfile(rawName, customExpression, restricted, locked);
 		} else if (findByCode(code) != null) {
 			throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlProfile.code.exists", code));
 		}
-		return new AccessControlProfile(rawName, code, customExpression, restricted);
+		return new AccessControlProfile(rawName, code, customExpression, restricted, locked);
 	}
 
 	private void checkRules() {
@@ -72,6 +75,10 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 		}
 
 		if (getRestricted() == null) {
+			throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.manager.required"));
+		}
+
+		if (getLocked() == null) {
 			throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.manager.required"));
 		}
 	}
@@ -91,6 +98,10 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
 	public Boolean isRestricted() {
 		return getRestricted();
+	}
+
+	public Boolean isLocked() {
+		return getLocked();
 	}
 
 	@pt.ist.fenixframework.Atomic

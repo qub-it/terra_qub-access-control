@@ -8,12 +8,14 @@ class AccessControlProfile  {
  String rawName (REQUIRED) ; 
  String code  (REQUIRED) ;
  Boolean restricted (REQUIRED) ; 
+ Boolean locked (REQUIRED) ; 
  String customExpression ;
 }
 class AccessControlPermission  {
  String code  (REQUIRED) ; 
  String rawName (REQUIRED) ; 
- Boolean restricted (REQUIRED) ;
+ Boolean restricted (REQUIRED) ; 
+ Boolean locked (REQUIRED) ;
 }
 
 relation DomainRootprofilesAccessControlProfile {
