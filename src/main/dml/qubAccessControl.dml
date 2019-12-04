@@ -9,6 +9,7 @@ class AccessControlProfile  {
  String code  (REQUIRED) ;
  Boolean restricted (REQUIRED) ; 
  Boolean locked (REQUIRED) ; 
+ String customExpressionValidator ;
  String customExpression ;
 }
 class AccessControlPermission  {
