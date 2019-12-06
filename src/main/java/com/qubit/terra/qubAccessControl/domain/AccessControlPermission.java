@@ -1,13 +1,21 @@
 package com.qubit.terra.qubAccessControl.domain;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
 import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlPermission extends AccessControlPermission_Base {
+
+    static final private Cache<String, Optional<AccessControlPermission>> CACHE =
+            CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(10 * 1000).expireAfterWrite(2, TimeUnit.HOURS).build();
 
 	private static final String AUTHORIZATION_MANAGER_NAME = AccessControlBundle
 			.localizedString("AccessControlPermission.manager");
@@ -36,6 +44,7 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 		setCode(code);
 		setLocked(locked);
 		checkRules();
+        CACHE.put(code, Optional.of(this));
 	}
 
 	private void checkRules() {
@@ -70,7 +79,11 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 	}
 
 	public static AccessControlPermission findByCode(String code) {
-		return findAll().stream().filter(op -> op.getCode().equals(code)).findFirst().orElse(null);
+        try {
+            return CACHE.get(code, () -> findAll().stream().filter(op -> op.getCode().equals(code)).findFirst()).orElse(null);
+        } catch (ExecutionException e) {
+            return null;
+        }
 	}
 
 	public static Set<AccessControlPermission> findAll() {
@@ -86,6 +99,7 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 
 		setDomainRoot(null);
 		super.deleteDomainObject();
+        CACHE.invalidate(getCode());
 	}
 
 	public String getExpression() {
