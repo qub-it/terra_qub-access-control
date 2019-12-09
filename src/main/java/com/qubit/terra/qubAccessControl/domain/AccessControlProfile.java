@@ -16,35 +16,37 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 		setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
 	}
 
-	protected AccessControlProfile(String rawName, String code, String customExpression, Boolean restricted,
+	protected AccessControlProfile(String rawName, String code, String customExpression, String customExpressionValidator, Boolean restricted,
 			Boolean locked) {
 		this();
 		setRawName(rawName);
 		setCode(code);
 		setCustomExpression(customExpression);
+		setCustomExpressionValidator(customExpressionValidator);
 		setRestricted(restricted);
 		setLocked(locked);
 		checkRules();
 	}
 
-	protected AccessControlProfile(String rawName, String customExpression, Boolean restricted, Boolean locked) {
+	protected AccessControlProfile(String rawName, String customExpression, String customExpressionValidator, Boolean restricted, Boolean locked) {
 		this();
 		setRawName(rawName);
 		setCode(UUID.randomUUID().toString());
 		setCustomExpression(customExpression);
+        setCustomExpressionValidator(customExpressionValidator);
 		setRestricted(restricted);
 		setLocked(locked);
 		checkRules();
 	}
 
-	public static AccessControlProfile create(String rawName, String code, String customExpression, Boolean restricted,
+	public static AccessControlProfile create(String rawName, String code, String customExpression, String customExpressionValidator, Boolean restricted,
 			Boolean locked) {
 		if (code == null) {
-			return new AccessControlProfile(rawName, customExpression, restricted, locked);
+			return new AccessControlProfile(rawName, customExpression, customExpressionValidator, restricted, locked);
 		} else if (findByCode(code) != null) {
 			throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlProfile.code.exists", code));
 		}
-		return new AccessControlProfile(rawName, code, customExpression, restricted, locked);
+		return new AccessControlProfile(rawName, code, customExpression, customExpressionValidator, restricted, locked);
 	}
 
 	private void checkRules() {
