@@ -11,20 +11,6 @@ import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlProfile extends AccessControlProfile_Base {
 
-	private static final String MANAGER_CODE = AccessControlBundle.get("AccessControlProfile.manager.code");
-	private static final String MANAGER_NAME = AccessControlBundle.localizedString("AccessControlProfile.manager.name");
-
-	static public AccessControlProfile manager() {
-		return AccessControlProfile.findByCode(MANAGER_CODE);
-	}
-
-	static public void initialize() {
-		if (findAll().isEmpty()) {
-			final AccessControlProfile manager = create(MANAGER_NAME, MANAGER_CODE, "", true, false);
-			manager.addPermission(AccessControlPermission.manager());
-		}
-	}
-
 	protected AccessControlProfile() {
 		super();
 		setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());

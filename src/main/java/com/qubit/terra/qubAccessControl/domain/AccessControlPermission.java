@@ -17,21 +17,6 @@ public class AccessControlPermission extends AccessControlPermission_Base {
     static final private Cache<String, Optional<AccessControlPermission>> CACHE =
             CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(10 * 1000).expireAfterWrite(2, TimeUnit.HOURS).build();
 
-	private static final String AUTHORIZATION_MANAGER_NAME = AccessControlBundle
-			.localizedString("AccessControlPermission.manager");
-
-	private static final String AUTHORIZATION_MANAGER_CODE = AccessControlBundle.get("AccessControlPermission.manager");
-
-	static public AccessControlPermission manager() {
-		return AccessControlPermission.findByCode(AUTHORIZATION_MANAGER_CODE);
-	}
-
-	static public void initialize() {
-		if (findAll().isEmpty()) {
-			create(AUTHORIZATION_MANAGER_NAME, true, AUTHORIZATION_MANAGER_CODE, false);
-		}
-	}
-
 	protected AccessControlPermission() {
 		super();
 		setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());

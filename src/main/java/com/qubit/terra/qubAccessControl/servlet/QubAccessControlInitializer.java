@@ -4,13 +4,6 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import com.qubit.terra.qubAccessControl.domain.AccessControlPermission;
-import com.qubit.terra.qubAccessControl.domain.AccessControlProfile;
-import com.qubit.terra.qubAccessControl.domain.AccessControlProfileType;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-
 @WebListener
 public class QubAccessControlInitializer implements ServletContextListener {
 
@@ -23,21 +16,8 @@ public class QubAccessControlInitializer implements ServletContextListener {
         public void contextDestroyed(ServletContextEvent event){
         }
         
-        @Atomic(mode = TxMode.WRITE)
         private void initializeProfiles() {
-            
-            // The ProfileType must be initialized before
-            // the profile.
-            // The Profile initialize must execute
-            // before OperationPermission initialize because
-            // the OperationPermission.AUTHORIZATION_MANAGER has
-            // to be associated with the Profile.manager.
-            //
-            // 21 August 2019 - Daniel Pires
-            //
-//            AccessControlProfileType.initialize();
-            AccessControlPermission.initialize();
-            AccessControlProfile.initialize();
+
         }
         
 }
