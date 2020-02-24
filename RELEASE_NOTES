@@ -1,3 +1,5 @@
+- Bug fix: Fixed permission cache
+
 1.2.3 (09-12-2019)
 - Bug fix: Fixed Initialization
 - Bug fix: Fixed creation method with expression validator
