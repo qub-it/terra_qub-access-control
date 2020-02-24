@@ -13,7 +13,7 @@
 
 	<groupId>com.qubit.terra</groupId>
 	<artifactId>qub-access-control</artifactId>
-	<version>1.2.3</version>
+	<version>1.2.4</version>
 	<packaging>jar</packaging>
 
 	<name>terra_qub-acess-control</name>
