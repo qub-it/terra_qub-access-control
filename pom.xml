@@ -6,8 +6,8 @@
 
 	<parent>
 		<groupId>com.qubit.solution.fenixedu</groupId>
-        <artifactId>qub-fenixedu-project</artifactId>
-        <version>1.0.1</version>
+	        <artifactId>qub-fenixedu-project</artifactId>
+	        <version>1.0.1-rc-jdk11</version>
 		<relativePath />
 	</parent>
 
