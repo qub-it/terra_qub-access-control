@@ -11,6 +11,8 @@ class AccessControlProfile  {
  Boolean locked (REQUIRED) ; 
  String customExpressionValidator ;
  String customExpression ;
+ String objectsClass ;
+ String objects;
 }
 class AccessControlPermission  {
  String code  (REQUIRED) ; 

@@ -10,6 +10,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
+import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlPermission extends AccessControlPermission_Base {
@@ -100,5 +101,15 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 
     public Boolean isLocked() {
         return getLocked();
+    }
+
+    public <T extends DomainObject> Set<T> provideObjects() {
+        return (Set<T>) getProfileSet().stream().flatMap(profile -> profile.provideObjects().stream())
+                .collect(Collectors.toSet());
+    }
+
+    public <T extends DomainObject> Set<T> provideObjects(Class<T> clazz) {
+        return (Set<T>) getProfileSet().stream().filter(profile -> profile.getProviderClass().equals(clazz))
+                .flatMap(profile -> profile.provideObjects().stream()).collect(Collectors.toSet());
     }
 }
