@@ -122,11 +122,15 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     private void setObjects(Set<? extends DomainObject> objects) {
-        JsonObject jsonObject = new JsonObject();
-        JsonArray jsonArray = new JsonArray();
-        objects.forEach(object -> jsonArray.add(object.getExternalId()));
-        jsonObject.add(getProviderClass().getName(), jsonArray);
-        super.setObjects(jsonObject.toString());
+        if (!objects.isEmpty()) {
+            JsonObject jsonObject = new JsonObject();
+            JsonArray jsonArray = new JsonArray();
+            objects.forEach(object -> jsonArray.add(object.getExternalId()));
+            jsonObject.add(getProviderClass().getName(), jsonArray);
+            super.setObjects(jsonObject.toString());
+        } else {
+            super.setObjects("");
+        }
     }
 
     public <T extends DomainObject> void addObject(T object) {
@@ -134,7 +138,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         if (providerClass == null) {
             throw new IllegalStateException("No object class defined");
         }
-        if (object.getClass().equals(providerClass)) {
+        if (providerClass.isAssignableFrom(object.getClass())) {
             Set<T> objects = provideObjects();
             objects.add(object);
             setObjects(objects);
@@ -149,7 +153,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         if (providerClass == null) {
             throw new IllegalStateException("No object class defined");
         }
-        if (object.getClass().equals(providerClass)) {
+        if (providerClass.isAssignableFrom(object.getClass())) {
             Set<T> objects = provideObjects();
             objects.remove(object);
             setObjects(objects);
@@ -180,7 +184,9 @@ public class AccessControlProfile extends AccessControlProfile_Base {
                 }
             });
         }
-        cleanObjectsJSON(oidsToRemove);
+        if (!oidsToRemove.isEmpty()) {
+            cleanObjectsJSON(oidsToRemove);
+        }
         return result;
     }
 
