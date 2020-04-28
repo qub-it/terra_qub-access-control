@@ -12,6 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
+import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
@@ -131,7 +132,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     public <T extends DomainObject> void addObject(T object) {
         Class providerClass = getProviderClass();
         if (providerClass == null) {
-            throw new IllegalStateException("No object clas defined");
+            throw new IllegalStateException("No object class defined");
         }
         if (object.getClass().equals(providerClass)) {
             Set<T> objects = provideObjects();
@@ -146,7 +147,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     public <T extends DomainObject> void removeObject(T object) {
         Class providerClass = getProviderClass();
         if (providerClass == null) {
-            throw new IllegalStateException("No object clas defined");
+            throw new IllegalStateException("No object class defined");
         }
         if (object.getClass().equals(providerClass)) {
             Set<T> objects = provideObjects();
@@ -166,6 +167,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     public <T extends DomainObject> Set<T> provideObjects() {
         Class T = getProviderClass();
         Set<T> result = new HashSet<>();
+        Set<String> oidsToRemove = new HashSet<>();
         if (!StringUtils.isBlank(super.getObjects())) {
             JsonObject json = new Gson().fromJson(super.getObjects(), JsonObject.class);
             JsonArray objectsOIDArray = json.get(getObjectsClass()).getAsJsonArray();
@@ -173,10 +175,22 @@ public class AccessControlProfile extends AccessControlProfile_Base {
                 DomainObject object = FenixFramework.getDomainObject(oid.getAsString());
                 if (FenixFramework.isDomainObjectValid(object)) {
                     result.add((T) object);
+                } else {
+                    oidsToRemove.add(oid.getAsString());
                 }
             });
         }
+        cleanObjectsJSON(oidsToRemove);
         return result;
+    }
+
+    @Atomic
+    private void cleanObjectsJSON(Set<String> oidsToRemove) {
+        String objects = super.getObjects();
+        for (String oid : oidsToRemove) {
+            objects = objects.replace("\"" + oid + "\",", "").replace(", \"" + oid + "\"", "");
+        }
+        super.setObjects(objects);
     }
 
     @pt.ist.fenixframework.Atomic
