@@ -109,7 +109,7 @@ public class AccessControlPermission extends AccessControlPermission_Base {
     }
 
     public <T extends DomainObject> Set<T> provideObjects(Class<T> clazz) {
-        return (Set<T>) getProfileSet().stream().filter(profile -> profile.getProviderClass().equals(clazz))
+        return (Set<T>) getProfileSet().stream().filter(profile -> profile.getProviderClass().isAssignableFrom(clazz))
                 .flatMap(profile -> profile.provideObjects().stream()).collect(Collectors.toSet());
     }
 }
