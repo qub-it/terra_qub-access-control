@@ -16,7 +16,8 @@ import pt.ist.fenixframework.FenixFramework;
 public class AccessControlPermission extends AccessControlPermission_Base {
 
     static final private Cache<String, Optional<AccessControlPermission>> CACHE =
-            CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(10 * 1000).expireAfterWrite(2, TimeUnit.HOURS).build();
+            CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).maximumSize(10 * 1000)
+                    .expireAfterWrite(2, TimeUnit.HOURS).build();
 
     protected AccessControlPermission() {
         super();

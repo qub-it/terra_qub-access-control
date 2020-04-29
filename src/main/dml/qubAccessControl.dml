@@ -12,6 +12,7 @@ class AccessControlProfile  {
  String customExpressionValidator ;
  String customExpression ;
  String objectsClass ;
+ String objectsProviderStrategy ;
  String objects;
 }
 class AccessControlPermission  {

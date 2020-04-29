@@ -1,12 +1,18 @@
 package com.qubit.terra.qubAccessControl.domain;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -18,13 +24,17 @@ import pt.ist.fenixframework.FenixFramework;
 
 public class AccessControlProfile extends AccessControlProfile_Base {
 
+    static final private Cache<AccessControlProfile, Set<? extends DomainObject>> CACHE =
+            CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).maximumSize(10000)
+                    .expireAfterWrite(24, TimeUnit.HOURS).build();
+
     protected AccessControlProfile() {
         super();
         setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
     }
 
     protected AccessControlProfile(String rawName, String code, String customExpression, String customExpressionValidator,
-            Boolean restricted, Boolean locked, String objectsClass) {
+            Boolean restricted, Boolean locked, String objectsClass, String objectsProviderStrategy) {
         this();
         setRawName(rawName);
         setCode(code);
@@ -33,11 +43,12 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         setRestricted(restricted);
         setLocked(locked);
         setObjectsClass(objectsClass);
+        setObjectsProviderStrategy(objectsProviderStrategy);
         checkRules();
     }
 
     protected AccessControlProfile(String rawName, String customExpression, String customExpressionValidator, Boolean restricted,
-            Boolean locked, String objectsClass) {
+            Boolean locked, String objectsClass, String objectsProviderStrategy) {
         this();
         setRawName(rawName);
         setCode(UUID.randomUUID().toString());
@@ -46,19 +57,21 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         setRestricted(restricted);
         setLocked(locked);
         setObjectsClass(objectsClass);
+        setObjectsProviderStrategy(objectsProviderStrategy);
         checkRules();
     }
 
     public static AccessControlProfile create(String rawName, String code, String customExpression,
-            String customExpressionValidator, Boolean restricted, Boolean locked, String objectsClass) {
+            String customExpressionValidator, Boolean restricted, Boolean locked, String objectsClass,
+            String objectsProviderStrategy) {
         if (code == null) {
             return new AccessControlProfile(rawName, customExpression, customExpressionValidator, restricted, locked,
-                    objectsClass);
+                    objectsClass, objectsProviderStrategy);
         } else if (findByCode(code) != null) {
             throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlProfile.code.exists", code));
         }
         return new AccessControlProfile(rawName, code, customExpression, customExpressionValidator, restricted, locked,
-                objectsClass);
+                objectsClass, objectsProviderStrategy);
     }
 
     private void checkRules() {
@@ -122,6 +135,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     private void setObjects(Set<? extends DomainObject> objects) {
+        CACHE.put(this, objects);
         if (!objects.isEmpty()) {
             JsonObject jsonObject = new JsonObject();
             JsonArray jsonArray = new JsonArray();
@@ -168,7 +182,63 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         throw new UnsupportedOperationException("Default method is disabled please use provideObjects().");
     }
 
+    private ProviderStrategy getProvider() {
+        return ProviderStrategy.PROVIDERS.get(getObjectsProviderStrategy());
+    }
+
+    public <T extends DomainObject> Boolean containsObject(T object) {
+        return getProvider().contains(this, object);
+    }
+
     public <T extends DomainObject> Set<T> provideObjects() {
+        return getProvider().provideAll(this);
+    }
+
+    protected <T extends DomainObject> Set<T> internalProvideObjects() {
+        Set<T> cacheResult = new HashSet<>();
+        Set<T> result = new HashSet<>();
+        Set<String> oidsToRemove = new HashSet<>();
+        try {
+            cacheResult.addAll((Collection<? extends T>) CACHE.get(this, () -> parseObjectsJSON()));
+        } catch (ExecutionException e) {
+            return Collections.EMPTY_SET;
+        }
+
+        // We are checking if the object is valid because we
+        // are persisting a weak reference to the object.
+        // If the object is no longer valid we remove it from
+        // the associated objects JSON.
+        //
+        // Daniel Pires - 29 April 2020
+        //
+        cacheResult.parallelStream().forEach(object -> {
+            if (FenixFramework.isDomainObjectValid(object)) {
+                result.add(object);
+            } else {
+                oidsToRemove.add(object.getExternalId());
+            }
+        });
+
+        if (!oidsToRemove.isEmpty()) {
+            cleanObjectsJSON(oidsToRemove);
+        }
+
+        return result;
+    }
+
+    private <T extends DomainObject> Set<T> parseObjectsJSON() {
+        Set<T> result = new HashSet<>();
+        if (!StringUtils.isBlank(super.getObjects())) {
+            JsonObject json = new Gson().fromJson(super.getObjects(), JsonObject.class);
+            JsonArray objectsOIDArray = json.get(getObjectsClass()).getAsJsonArray();
+            objectsOIDArray.forEach(oid -> {
+                result.add(FenixFramework.getDomainObject(oid.getAsString()));
+            });
+        }
+        return result;
+    }
+
+    public <T extends DomainObject> Set<T> provideObjectsWithoutCache() {
         Class T = getProviderClass();
         Set<T> result = new HashSet<>();
         Set<String> oidsToRemove = new HashSet<>();
@@ -192,6 +262,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
     @Atomic
     private void cleanObjectsJSON(Set<String> oidsToRemove) {
+        CACHE.invalidate(this);
         String objects = super.getObjects();
         for (String oid : oidsToRemove) {
             objects = objects.replace("\"" + oid + "\",", "").replace(", \"" + oid + "\"", "");
