@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
@@ -212,7 +213,8 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         // Daniel Pires - 29 April 2020
         //
         cacheResult.parallelStream().forEach(object -> {
-            if (FenixFramework.isDomainObjectValid(object)) {
+
+            if (isOjectValid(object)) {
                 result.add(object);
             } else {
                 oidsToRemove.add(object.getExternalId());
@@ -224,6 +226,18 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         }
 
         return result;
+    }
+
+    // This method was created because it is used
+    // on a parallel stream and we need that all
+    // the generated threads run on Atomic Read
+    // Mode.
+    //
+    // Daniel Pires - 30 April 2020
+    //
+    @Atomic(mode = TxMode.READ)
+    private <T extends DomainObject> boolean isOjectValid(T object) {
+        return FenixFramework.isDomainObjectValid(object);
     }
 
     private <T extends DomainObject> Set<T> parseObjectsJSON() {
