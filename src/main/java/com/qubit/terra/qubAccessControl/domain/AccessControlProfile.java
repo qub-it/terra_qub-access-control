@@ -212,7 +212,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         //
         // Daniel Pires - 29 April 2020
         //
-        cacheResult.parallelStream().forEach(object -> {
+        cacheResult.stream().forEach(object -> {
 
             if (isOjectValid(object)) {
                 result.add(object);
