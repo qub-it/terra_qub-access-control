@@ -86,8 +86,8 @@ public class AccessControlPermission extends AccessControlPermission_Base {
         }
 
         setDomainRoot(null);
-        super.deleteDomainObject();
         CACHE.invalidate(getCode());
+        super.deleteDomainObject();
     }
 
     public String getExpression() {
