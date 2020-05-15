@@ -3,6 +3,7 @@ package com.qubit.terra.qubAccessControl.domain;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +30,10 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).maximumSize(10000)
                     .expireAfterWrite(24, TimeUnit.HOURS).build();
 
+    static final private Cache<String, Optional<AccessControlProfile>> PROFILE_CACHE =
+            CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).maximumSize(10 * 1000)
+                    .expireAfterWrite(2, TimeUnit.HOURS).build();
+
     protected AccessControlProfile() {
         super();
         setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
@@ -46,6 +51,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         setObjectsClass(objectsClass);
         setObjectsProviderStrategy(objectsProviderStrategy);
         checkRules();
+        PROFILE_CACHE.put(code, Optional.of(this));
     }
 
     protected AccessControlProfile(String rawName, String customExpression, String customExpressionValidator, Boolean restricted,
@@ -60,6 +66,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         setObjectsClass(objectsClass);
         setObjectsProviderStrategy(objectsProviderStrategy);
         checkRules();
+        PROFILE_CACHE.put(getCode(), Optional.of(this));
     }
 
     public static AccessControlProfile create(String rawName, String code, String customExpression,
@@ -98,11 +105,22 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     public static AccessControlProfile findByName(String name) {
-        return findAll().stream().filter((AccessControlProfile p) -> p.getRawName().equals(name)).findFirst().orElse(null);
+        return findAll().parallelStream().filter((AccessControlProfile p) -> p.getRawName().equals(name)).findFirst()
+                .orElse(null);
     }
 
     public static AccessControlProfile findByCode(String code) {
-        return findAll().stream().filter((AccessControlProfile p) -> p.getCode().equals(code)).findFirst().orElse(null);
+        try {
+            AccessControlProfile result = PROFILE_CACHE
+                    .get(code, () -> findAll().stream().filter(op -> op.getCode().equals(code)).findFirst()).orElse(null);
+            if (result != null && FenixFramework.isDomainObjectValid(result)) {
+                return result;
+            }
+            PROFILE_CACHE.invalidate(code);
+            return null;
+        } catch (ExecutionException e) {
+            return null;
+        }
     }
 
     public static Set<AccessControlProfile> findAll() {
@@ -139,12 +157,29 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         CACHE.put(this, objects);
         if (!objects.isEmpty()) {
             JsonObject jsonObject = new JsonObject();
-            JsonArray jsonArray = new JsonArray();
-            objects.forEach(object -> jsonArray.add(object.getExternalId()));
-            jsonObject.add(getProviderClass().getName(), jsonArray);
+            StringBuilder builder = new StringBuilder("[");
+            builder.append(objects.parallelStream().map(o -> "\"" + o.getExternalId() + "\"").collect(Collectors.joining(",")));
+            builder.append("]");
+            jsonObject.addProperty(getProviderClass().getName(), builder.toString());
             super.setObjects(jsonObject.toString());
         } else {
             super.setObjects("");
+        }
+    }
+
+    public <T extends DomainObject> void addAllObjects(Collection<T> objects) {
+        Class providerClass = getProviderClass();
+        if (providerClass == null) {
+            throw new IllegalStateException("No object class defined");
+        }
+        Set<T> nonMatchingClassObjects =
+                objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
+        if (nonMatchingClassObjects.isEmpty()) {
+            Set<T> finalObjects = provideObjects();
+            finalObjects.addAll(objects);
+            setObjects(finalObjects);
+        } else {
+            throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
     }
 
@@ -160,6 +195,22 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         } else {
             throw new IllegalArgumentException("Expected to receive object of type " + providerClass.getName()
                     + " but received object of type " + object.getClass().getName());
+        }
+    }
+
+    public <T extends DomainObject> void removeAllObjects(Set<T> objects) {
+        Class providerClass = getProviderClass();
+        if (providerClass == null) {
+            throw new IllegalStateException("No object class defined");
+        }
+        Set<T> nonMatchingClassObjects =
+                objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
+        if (nonMatchingClassObjects.isEmpty()) {
+            Set<T> finalObjects = provideObjects();
+            finalObjects.removeAll(objects);
+            setObjects(finalObjects);
+        } else {
+            throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
     }
 
@@ -221,6 +272,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             }
         });
 
+        // TODO: maybe lançar thread para apagar?
         if (!oidsToRemove.isEmpty()) {
             cleanObjectsJSON(oidsToRemove);
         }
@@ -295,6 +347,8 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         getPermissionSet().forEach(permission -> removePermission(permission));
 
         setDomainRoot(null);
+
+        PROFILE_CACHE.invalidate(getCode());
         super.deleteDomainObject();
     }
 
