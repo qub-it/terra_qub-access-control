@@ -15,7 +15,9 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
@@ -157,10 +159,10 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         CACHE.put(this, objects);
         if (!objects.isEmpty()) {
             JsonObject jsonObject = new JsonObject();
-            StringBuilder builder = new StringBuilder("[");
-            builder.append(objects.parallelStream().map(o -> "\"" + o.getExternalId() + "\"").collect(Collectors.joining(",")));
-            builder.append("]");
-            jsonObject.addProperty(getProviderClass().getName(), builder.toString());
+            Gson gson = new GsonBuilder().create();
+            JsonElement objectsJsonArray =
+                    gson.toJsonTree(objects.stream().map(o -> o.getExternalId()).collect(Collectors.toList()));
+            jsonObject.add(getProviderClass().getName(), objectsJsonArray);
             super.setObjects(jsonObject.toString());
         } else {
             super.setObjects("");
@@ -296,7 +298,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         Set<T> result = new HashSet<>();
         if (!StringUtils.isBlank(super.getObjects())) {
             JsonObject json = new Gson().fromJson(super.getObjects(), JsonObject.class);
-            JsonArray objectsOIDArray = json.get(getObjectsClass()).getAsJsonArray();
+            JsonArray objectsOIDArray = json.getAsJsonArray(getObjectsClass());
             objectsOIDArray.forEach(oid -> {
                 result.add(FenixFramework.getDomainObject(oid.getAsString()));
             });
