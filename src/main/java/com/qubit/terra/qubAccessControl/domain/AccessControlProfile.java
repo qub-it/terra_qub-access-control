@@ -241,11 +241,19 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     public <T extends DomainObject> Boolean containsObject(T object) {
-        return getProvider().contains(this, object);
+        ProviderStrategy provider = getProvider();
+        if (provider == null) {
+            return false;
+        }
+        return provider.contains(this, object);
     }
 
     public <T extends DomainObject> Set<T> provideObjects() {
-        return getProvider().provideAll(this);
+        ProviderStrategy provider = getProvider();
+        if (provider == null) {
+            return new HashSet<>();
+        }
+        return provider.provideAll(this);
     }
 
     protected <T extends DomainObject> Set<T> internalProvideObjects() {

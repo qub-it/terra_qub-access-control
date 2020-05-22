@@ -1,3 +1,5 @@
+- Bug fix: Fix NPE when verifying if a object is in profile without objects association
+
 1.4.0 (21-05-2020)
 - New Feature: Profile association with any object
 
