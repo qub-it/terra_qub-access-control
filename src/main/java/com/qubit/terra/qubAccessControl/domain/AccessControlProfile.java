@@ -107,8 +107,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     public static AccessControlProfile findByName(String name) {
-        return findAll().parallelStream().filter((AccessControlProfile p) -> p.getRawName().equals(name)).findFirst()
-                .orElse(null);
+        return findAll().stream().filter((AccessControlProfile p) -> p.getRawName().equals(name)).findFirst().orElse(null);
     }
 
     public static AccessControlProfile findByCode(String code) {
