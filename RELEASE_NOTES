@@ -1,3 +1,5 @@
+- Improvement: Added flag to check if permission and profile are auto generated
+
 1.4.1 (22-05-2020)
 - Bug fix: Fix NPE when verifying if a object is in profile without objects association
 
