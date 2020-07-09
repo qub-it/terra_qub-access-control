@@ -240,7 +240,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     private ProviderStrategy getProvider() {
-        return ProviderStrategy.PROVIDERS.get(getObjectsProviderStrategy());
+        return ProviderStrategy.getProvider(getObjectsProviderStrategy());
     }
 
     public <T extends DomainObject> Boolean containsObject(T object) {

@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public abstract class ProviderStrategy<T extends Object> {
 
-    protected static final Map<String, ProviderStrategy> PROVIDERS = new HashMap<String, ProviderStrategy>();
+    private static final Map<String, ProviderStrategy> PROVIDERS = new HashMap<String, ProviderStrategy>();
 
     private String name;
     private Function<AccessControlProfile, Set<T>> provideFunction;
