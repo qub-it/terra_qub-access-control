@@ -31,6 +31,6 @@ public abstract class ProviderStrategy<T extends Object> {
         return this.name;
     }
 
-    public static Map<String, ProviderStrategy> PROVIDERS = new HashMap<String, ProviderStrategy>();
+    public static final Map<String, ProviderStrategy> PROVIDERS = new HashMap<String, ProviderStrategy>();
 
 }
