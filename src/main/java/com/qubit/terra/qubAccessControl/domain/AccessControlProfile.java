@@ -146,7 +146,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             try {
                 return Class.forName(objectsClass);
             } catch (ClassNotFoundException e) {
-                throw new IllegalStateException("No class found for classname " + objectsClass);
+                throw new IllegalStateException("No class found for classname " + objectsClass, e);
             }
         }
         return null;
