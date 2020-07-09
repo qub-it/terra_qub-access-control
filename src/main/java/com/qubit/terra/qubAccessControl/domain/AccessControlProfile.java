@@ -317,28 +317,6 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         return result;
     }
 
-    public <T extends DomainObject> Set<T> provideObjectsWithoutCache() {
-        Class T = getProviderClass();
-        Set<T> result = new HashSet<>();
-        Set<String> oidsToRemove = new HashSet<>();
-        if (!StringUtils.isBlank(super.getObjects())) {
-            JsonObject json = new Gson().fromJson(super.getObjects(), JsonObject.class);
-            JsonArray objectsOIDArray = json.get(getObjectsClass()).getAsJsonArray();
-            objectsOIDArray.forEach(oid -> {
-                DomainObject object = FenixFramework.getDomainObject(oid.getAsString());
-                if (FenixFramework.isDomainObjectValid(object)) {
-                    result.add((T) object);
-                } else {
-                    oidsToRemove.add(oid.getAsString());
-                }
-            });
-        }
-        if (!oidsToRemove.isEmpty()) {
-            cleanObjectsJSON(oidsToRemove);
-        }
-        return result;
-    }
-
     @Atomic
     private void cleanObjectsJSON(Set<String> oidsToRemove) {
         CACHE.invalidate(this);
