@@ -1,4 +1,5 @@
 - Refactor: Moved strategies to access-control-management
+- Bug fix: General bug fix
 
 1.5.0 (23-06-2020)
 - Improvement: Added flag to check if permission and profile are auto generated
