@@ -33,18 +33,4 @@ public abstract class ProviderStrategy<T extends Object> {
 
     public static Map<String, ProviderStrategy> PROVIDERS = new HashMap<String, ProviderStrategy>();
 
-    static {
-
-        // All objects of one type are valid
-        ProviderStrategy<?> ALL_OF_CLASS = new ProvideAllOfClassStrategy<>();
-        PROVIDERS.put(ALL_OF_CLASS.getClass().getName(), ALL_OF_CLASS);
-
-        // All objects of the type or sub types are valid
-        ProviderStrategy<?> ALL_OF_CLASS_AND_SUB_CLASSES = new ProvideAllOfClassAndSubClassStrategy<>();
-        PROVIDERS.put(ALL_OF_CLASS_AND_SUB_CLASSES.getClass().getName(), ALL_OF_CLASS_AND_SUB_CLASSES);
-
-        // Only the associated objects are valid
-        ProviderStrategy<?> ASSOCIATED = new ProvideAssociatedStrategy<>();
-        PROVIDERS.put(ASSOCIATED.getClass().getName(), ASSOCIATED);
-    }
 }
