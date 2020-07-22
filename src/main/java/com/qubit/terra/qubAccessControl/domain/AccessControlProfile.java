@@ -329,6 +329,9 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
     @pt.ist.fenixframework.Atomic
     public void delete() {
+        if (isLocked()) {
+            throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.delete.protected"));
+        }
         if (!getParentSet().isEmpty()) {
             throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.delete")
                     + getParentSet().stream().map(profile -> profile.getRawName()).collect(Collectors.joining(",")));
