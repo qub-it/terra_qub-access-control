@@ -10,6 +10,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
@@ -64,8 +66,7 @@ public class AccessControlPermission extends AccessControlPermission_Base {
 
     public static AccessControlPermission findByCode(String code) {
         try {
-            AccessControlPermission result =
-                    CACHE.get(code, () -> findAll().stream().filter(op -> op.getCode().equals(code)).findFirst()).orElse(null);
+            AccessControlPermission result = CACHE.get(code, () -> lookup(code)).orElse(null);
             if (result != null && FenixFramework.isDomainObjectValid(result)) {
                 return result;
             }
@@ -74,6 +75,11 @@ public class AccessControlPermission extends AccessControlPermission_Base {
         } catch (ExecutionException e) {
             return null;
         }
+    }
+
+    @Atomic(mode = TxMode.READ)
+    private static Optional<AccessControlPermission> lookup(String code) {
+        return findAll().stream().filter(op -> op.getCode().equals(code)).findFirst();
     }
 
     public static Set<AccessControlPermission> findAll() {

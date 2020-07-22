@@ -112,8 +112,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
     public static AccessControlProfile findByCode(String code) {
         try {
-            AccessControlProfile result = PROFILE_CACHE
-                    .get(code, () -> findAll().stream().filter(op -> op.getCode().equals(code)).findFirst()).orElse(null);
+            AccessControlProfile result = PROFILE_CACHE.get(code, () -> lookup(code)).orElse(null);
             if (result != null && FenixFramework.isDomainObjectValid(result)) {
                 return result;
             }
@@ -122,6 +121,11 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         } catch (ExecutionException e) {
             return null;
         }
+    }
+
+    @Atomic(mode = TxMode.READ)
+    private static Optional<AccessControlProfile> lookup(String code) {
+        return findAll().stream().filter(op -> op.getCode().equals(code)).findFirst();
     }
 
     public static Set<AccessControlProfile> findAll() {
