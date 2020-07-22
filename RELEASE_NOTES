@@ -1,3 +1,4 @@
+1.6.0 (22-07-2020)
 - Refactor: Moved strategies to access-control-management
 - Bug fix: General bug fix
 - Bug fix: Fixed read outside of an read transaction
