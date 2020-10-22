@@ -1,3 +1,5 @@
+- Bug fix: Fixed objects cleaning form profiles
+
 1.6.0 (22-07-2020)
 - Refactor: Moved strategies to access-control-management
 - Bug fix: General bug fix

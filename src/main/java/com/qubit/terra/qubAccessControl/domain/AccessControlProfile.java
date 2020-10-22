@@ -326,7 +326,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         CACHE.invalidate(this);
         String objects = super.getObjects();
         for (String oid : oidsToRemove) {
-            objects = objects.replace("\"" + oid + "\",", "").replace(", \"" + oid + "\"", "");
+            objects = objects.replace("\"" + oid + "\"", "").replace(",,", ",").replace("[,", "[").replace(",]", "]");
         }
         super.setObjects(objects);
     }
