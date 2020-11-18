@@ -1,3 +1,5 @@
+- Bug fix: Verify custom expression and custom expression validator to checkrules 
+
 1.6.1 (22-10-2020)
 - Bug fix: Fixed objects cleaning form profiles
 

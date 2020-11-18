@@ -104,6 +104,11 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         if (getLocked() == null) {
             throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.manager.required"));
         }
+
+        if (StringUtils.isNotBlank(getCustomExpression()) && StringUtils.isBlank(getCustomExpressionValidator())) {
+            throw new IllegalStateException(
+                    AccessControlBundle.get("error.AccessControlProfile.customExpressionValidator.required"));
+        }
     }
 
     public static AccessControlProfile findByName(String name) {
