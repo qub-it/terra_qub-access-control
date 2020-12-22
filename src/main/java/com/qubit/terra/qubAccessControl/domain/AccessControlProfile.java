@@ -356,6 +356,13 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     @Override
+    public void addParent(AccessControlProfile parent) {
+        if (validate(parent)) {
+            super.addParent(parent);
+        }
+    }
+
+    @Override
     public void addChild(AccessControlProfile child) {
         if (validate(child)) {
             super.addChild(child);

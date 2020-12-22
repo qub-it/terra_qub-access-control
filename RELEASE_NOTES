@@ -1,3 +1,5 @@
+- Bug fix: Fixed add parent profile to prevent cicle
+
 1.6.2 (18-11-2020)
 - Bug fix: Verify custom expression and custom expression validator to checkrules 
 
