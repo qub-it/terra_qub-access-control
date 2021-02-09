@@ -253,11 +253,19 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     public <T extends DomainObject> Boolean containsObject(T object) {
-        ProviderStrategy provider = getProvider();
-        if (provider == null) {
-            return false;
+        return parseObjectsJSONToStringArray().contains(object.getExternalId());
+    }
+
+    private Set<String> parseObjectsJSONToStringArray() {
+        Set<String> result = new HashSet<>();
+        if (!StringUtils.isBlank(super.getObjects())) {
+            JsonObject json = new Gson().fromJson(super.getObjects(), JsonObject.class);
+            JsonArray objectsOIDArray = json.getAsJsonArray(getObjectsClass());
+            objectsOIDArray.forEach(oid -> {
+                result.add(oid.getAsString());
+            });
         }
-        return provider.contains(this, object);
+        return result;
     }
 
     public <T extends DomainObject> Set<T> provideObjects() {

@@ -1,3 +1,5 @@
+- Improvement: Improved check if profile contains object due to performance issues
+
 1.6.3 (22-12-2020)
 - Bug fix: Fixed add parent profile to prevent cicle
 
