@@ -1,4 +1,5 @@
 - Improvement: Improved check if profile contains object due to performance issues
+- Improvement: Added soft reference to access control profile parsed objects
 
 1.6.3 (22-12-2020)
 - Bug fix: Fixed add parent profile to prevent cicle

@@ -1,5 +1,6 @@
 package com.qubit.terra.qubAccessControl.domain;
 
+import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,6 +36,8 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     static final private Cache<String, Optional<AccessControlProfile>> PROFILE_CACHE =
             CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).maximumSize(10 * 1000)
                     .expireAfterWrite(2, TimeUnit.HOURS).build();
+
+    private SoftReference<Set<String>> parsedObjectIDs;
 
     protected AccessControlProfile() {
         super();
@@ -179,6 +182,10 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         } else {
             super.setObjects("");
         }
+
+        if (parsedObjectIDs != null) {
+            parsedObjectIDs.clear();
+        }
     }
 
     public <T extends DomainObject> void addAllObjects(Collection<T> objects) {
@@ -257,6 +264,10 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     private Set<String> parseObjectsJSONToStringArray() {
+        if (parsedObjectIDs != null && parsedObjectIDs.get() != null) {
+            return parsedObjectIDs.get();
+        }
+
         Set<String> result = new HashSet<>();
         if (!StringUtils.isBlank(super.getObjects())) {
             JsonObject json = new Gson().fromJson(super.getObjects(), JsonObject.class);
@@ -265,6 +276,8 @@ public class AccessControlProfile extends AccessControlProfile_Base {
                 result.add(oid.getAsString());
             });
         }
+        parsedObjectIDs = new SoftReference<Set<String>>(result);
+
         return result;
     }
 
@@ -324,19 +337,32 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
     private <T extends DomainObject> Set<T> parseObjectsJSON() {
         Set<T> result = new HashSet<>();
+        Set<String> oids = new HashSet<>();
         if (!StringUtils.isBlank(super.getObjects())) {
             JsonObject json = new Gson().fromJson(super.getObjects(), JsonObject.class);
             JsonArray objectsOIDArray = json.getAsJsonArray(getObjectsClass());
             objectsOIDArray.forEach(oid -> {
-                result.add(FenixFramework.getDomainObject(oid.getAsString()));
+                String oidAsString = oid.getAsString();
+                result.add(FenixFramework.getDomainObject(oidAsString));
+                oids.add(oidAsString);
             });
         }
+
+        if (parsedObjectIDs != null) {
+            parsedObjectIDs.clear();
+        }
+
+        parsedObjectIDs = new SoftReference<Set<String>>(oids);
+
         return result;
     }
 
     @Atomic
     private void cleanObjectsJSON(Set<String> oidsToRemove) {
         CACHE.invalidate(this);
+        if (parsedObjectIDs != null) {
+            parsedObjectIDs.clear();
+        }
         String objects = super.getObjects();
         for (String oid : oidsToRemove) {
             objects = objects.replace("\"" + oid + "\"", "").replace(",,", ",").replace("[,", "[").replace(",]", "]");
