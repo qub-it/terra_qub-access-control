@@ -308,7 +308,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         //
         cacheResult.stream().forEach(object -> {
 
-            if (isOjectValid(object)) {
+            if (isObjectValid(object)) {
                 result.add(object);
             } else {
                 oidsToRemove.add(object.getExternalId());
@@ -331,7 +331,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     // Daniel Pires - 30 April 2020
     //
     @Atomic(mode = TxMode.READ)
-    private <T extends DomainObject> boolean isOjectValid(T object) {
+    private <T extends DomainObject> boolean isObjectValid(T object) {
         return FenixFramework.isDomainObjectValid(object);
     }
 
