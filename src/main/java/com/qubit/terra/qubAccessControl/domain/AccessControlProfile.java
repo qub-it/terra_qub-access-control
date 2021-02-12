@@ -37,7 +37,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).maximumSize(10 * 1000)
                     .expireAfterWrite(2, TimeUnit.HOURS).build();
 
-    private SoftReference<Set<String>> parsedObjectIDs;
+    private transient SoftReference<Set<String>> parsedObjectIDs;
 
     protected AccessControlProfile() {
         super();

@@ -1,3 +1,5 @@
+- Bug fix: Fixing SpotBugs issue (SE_BAD_FIELD)
+
 1.7.0 (11-02-2021)
 - Improvement: Improved check if profile contains object due to performance issues
 - Improvement: Added soft reference to access control profile parsed objects
