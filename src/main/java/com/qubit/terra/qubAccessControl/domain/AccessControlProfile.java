@@ -260,7 +260,12 @@ public class AccessControlProfile extends AccessControlProfile_Base {
     }
 
     public <T extends DomainObject> Boolean containsObject(T object) {
-        return parseObjectsJSONToStringArray().contains(object.getExternalId());
+        if ("com.qubit.terra.qubAccessControl.domain.ProvideAssociatedStrategy".equals(getObjectsProviderStrategy())) {
+            return parseObjectsJSONToStringArray().contains(object.getExternalId());
+        } else {
+            ProviderStrategy provider = getProvider();
+            return provider != null ? provider.contains(this, object) : false;
+        }
     }
 
     private Set<String> parseObjectsJSONToStringArray() {
