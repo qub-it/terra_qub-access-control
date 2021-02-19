@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.qubit.terra.qubAccessControl.services.ObjectProfileCacheService;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
 import pt.ist.fenixframework.Atomic;
@@ -199,6 +200,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             Set<T> finalObjects = provideObjects();
             finalObjects.addAll(objects);
             setObjects(finalObjects);
+            objects.forEach(object -> ObjectProfilesCache.addToCache(object, this));
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
@@ -213,6 +215,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             Set<T> objects = provideObjects();
             objects.add(object);
             setObjects(objects);
+            ObjectProfilesCache.addToCache(object, this);
         } else {
             throw new IllegalArgumentException("Expected to receive object of type " + providerClass.getName()
                     + " but received object of type " + object.getClass().getName());
@@ -230,6 +233,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             Set<T> finalObjects = provideObjects();
             finalObjects.removeAll(objects);
             setObjects(finalObjects);
+            objects.forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
@@ -244,6 +248,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             Set<T> objects = provideObjects();
             objects.remove(object);
             setObjects(objects);
+            ObjectProfilesCache.removeFromCache(object, this);
         } else {
             throw new IllegalArgumentException("Expected to receive object of type " + providerClass.getName()
                     + " but received object of type " + object.getClass().getName());
@@ -255,7 +260,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         throw new UnsupportedOperationException("Default method is disabled please use provideObjects().");
     }
 
-    private ProviderStrategy getProvider() {
+    protected ProviderStrategy getProvider() {
         return ProviderStrategy.getProvider(getObjectsProviderStrategy());
     }
 
@@ -442,6 +447,30 @@ public class AccessControlProfile extends AccessControlProfile_Base {
         parents.addAll(profile.getParentSet());
         profile.getParentSet().forEach(p -> parents.addAll(addParents(p)));
         return parents;
+    }
+
+    @Override
+    public void setObjectsClass(String objectsClass) {
+        updateObjectsCache();
+        super.setObjectsClass(objectsClass);
+    }
+
+    @Override
+    public void setObjectsProviderStrategy(String objectsProviderStrategy) {
+        updateObjectsCache();
+        super.setObjectsProviderStrategy(objectsProviderStrategy);
+    }
+
+    public void updateObjectsCache() {
+        if (getProviderClass() == null || getObjectsProviderStrategy() == null) {
+            return;
+        }
+
+        provideObjects().forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
+
+        ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(getProviderClass(), this);
+        ObjectProfileCacheService.getAllSubClasses(getProviderClass())
+                .forEach(clazz -> ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(clazz, this));
     }
 
 }
