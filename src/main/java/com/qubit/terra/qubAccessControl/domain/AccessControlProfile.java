@@ -390,6 +390,8 @@ public class AccessControlProfile extends AccessControlProfile_Base {
                     + getParentSet().stream().map(profile -> profile.getRawName()).collect(Collectors.joining(",")));
         }
 
+        updateObjectsCache();
+
         getChildSet().forEach(child -> removeChild(child));
         getPermissionSet().forEach(permission -> removePermission(permission));
 
@@ -466,11 +468,13 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             return;
         }
 
-        provideObjects().forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
-
-        ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(getProviderClass(), this);
-        ObjectProfileCacheService.getAllSubClasses(getProviderClass())
-                .forEach(clazz -> ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(clazz, this));
+        if ("com.qubit.terra.qubAccessControl.domain.ProvideAssociatedStrategy".equals(getObjectsProviderStrategy())) {
+            provideObjects().forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
+        } else {
+            ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(getProviderClass(), this);
+            ObjectProfileCacheService.getAllSubClasses(getProviderClass())
+                    .forEach(clazz -> ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(clazz, this));
+        }
     }
 
 }
