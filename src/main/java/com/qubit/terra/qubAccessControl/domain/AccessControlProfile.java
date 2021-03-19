@@ -390,7 +390,7 @@ public class AccessControlProfile extends AccessControlProfile_Base {
                     + getParentSet().stream().map(profile -> profile.getRawName()).collect(Collectors.joining(",")));
         }
 
-        updateObjectsCache();
+        removeFromObjectsCache();
 
         getChildSet().forEach(child -> removeChild(child));
         getPermissionSet().forEach(permission -> removePermission(permission));
@@ -453,17 +453,19 @@ public class AccessControlProfile extends AccessControlProfile_Base {
 
     @Override
     public void setObjectsClass(String objectsClass) {
-        updateObjectsCache();
+        removeFromObjectsCache();
         super.setObjectsClass(objectsClass);
+        addToObjectsCache();
     }
 
     @Override
     public void setObjectsProviderStrategy(String objectsProviderStrategy) {
-        updateObjectsCache();
+        removeFromObjectsCache();
         super.setObjectsProviderStrategy(objectsProviderStrategy);
+        addToObjectsCache();
     }
 
-    public void updateObjectsCache() {
+    public void removeFromObjectsCache() {
         if (getProviderClass() == null || getObjectsProviderStrategy() == null) {
             return;
         }
@@ -474,6 +476,20 @@ public class AccessControlProfile extends AccessControlProfile_Base {
             ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(getProviderClass(), this);
             ObjectProfileCacheService.getAllSubClasses(getProviderClass())
                     .forEach(clazz -> ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(clazz, this));
+        }
+    }
+
+    public void addToObjectsCache() {
+        if (getProviderClass() == null || getObjectsProviderStrategy() == null) {
+            return;
+        }
+
+        if ("com.qubit.terra.qubAccessControl.domain.ProvideAssociatedStrategy".equals(getObjectsProviderStrategy())) {
+            provideObjects().forEach(object -> ObjectProfilesCache.addToCache(object, this));
+        } else {
+            ObjectProfilesCache.addToAllTypeOrSubtypeCache(getProviderClass(), this);
+            ObjectProfileCacheService.getAllSubClasses(getProviderClass())
+                    .forEach(clazz -> ObjectProfilesCache.addToAllTypeOrSubtypeCache(clazz, this));
         }
     }
 
