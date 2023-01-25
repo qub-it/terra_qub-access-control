@@ -6,8 +6,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.joda.time.DateTime;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.qubit.terra.framework.services.ServiceProvider;
+import com.qubit.terra.framework.services.accessControl.Permission;
+import com.qubit.terra.framework.services.accessControl.Profile;
+import com.qubit.terra.framework.services.versioning.VersioningInformationReader;
+import com.qubit.terra.framework.tools.primitives.LocalizedString;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
 import pt.ist.fenixframework.Atomic;
@@ -15,7 +22,7 @@ import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
-public class AccessControlPermission extends AccessControlPermission_Base {
+public class AccessControlPermission extends AccessControlPermission_Base implements Permission {
 
     static final private Cache<String, Optional<AccessControlPermission>> CACHE =
             CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).maximumSize(10 * 1000)
@@ -115,13 +122,38 @@ public class AccessControlPermission extends AccessControlPermission_Base {
     }
 
     public <T extends DomainObject> Set<T> provideObjects() {
-        return (Set<T>) getProfileSet().stream().flatMap(profile -> profile.provideObjects().stream())
-                .collect(Collectors.toSet());
+        return (Set<T>) getProfileSet().stream().flatMap(profile -> {
+            Set<DomainObject> provideObjects = profile.provideObjects();
+            return provideObjects.stream();
+        }).collect(Collectors.toSet());
     }
 
     public <T extends DomainObject> Set<T> provideObjects(Class<T> clazz) {
         return (Set<T>) getProfileSet().stream()
                 .filter(profile -> profile.getProviderClass() != null && profile.getProviderClass().isAssignableFrom(clazz))
-                .flatMap(profile -> profile.provideObjects().stream()).collect(Collectors.toSet());
+                .flatMap(profile -> {
+                    Set<DomainObject> provideObjects = profile.provideObjects();
+                    return provideObjects.stream();
+                }).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Profile> getProfiles() {
+        return getProfileSet().stream().collect(Collectors.toSet());
+    }
+
+    @Override
+    public void setName(LocalizedString name) {
+        setRawName(name.toString());
+    }
+
+    @Override
+    public LocalizedString getName() {
+        return new LocalizedString(getRawName());
+    }
+
+    @Override
+    public DateTime getCreationDate() {
+        return ServiceProvider.getService(VersioningInformationReader.class).getCreationDate(this);
     }
 }
