@@ -558,4 +558,24 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         return ServiceProvider.getService(AccessControlProfileManagerService.class).getMembers(this);
     }
 
+    @Override
+    public void removePermission(Permission permission) {
+        removePermission((AccessControlPermission) permission);
+    }
+
+    @Override
+    public void addChildProfile(Profile profile) {
+        addChild((AccessControlProfile) profile);
+    }
+
+    @Override
+    public void removeChildProfile(Profile profile) {
+        removeChild((AccessControlProfile) profile);
+    }
+
+    @Override
+    public void addPermission(Permission permission) {
+        addPermission((AccessControlPermission) permission);
+    }
+
 }
