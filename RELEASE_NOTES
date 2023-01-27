@@ -1,3 +1,5 @@
+- Improvement: Implementing access control interfaces of OMNIS.cloud platform
+
 1.8.2 (19-03-2021)
 - Bug fix: Fixed update object cache when changing class or provider strategy
 
