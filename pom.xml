@@ -22,19 +22,19 @@
 			<url>https://repo.fenixedu.org/fenixedu-maven-repository</url>
 		</repository>
 		<repository>
-			<id>qubIT-repo-public</id>
-			<url>https://repository.qub-it.com/nexus/content/groups/public</url>
+			<id>qubIT-oss</id>
+			<url>https://repository-oss.omnis.cloud/nexus/repository/releases/</url>
 		</repository>
 	</repositories>
 
 	<distributionManagement>
 		<repository>
-			<id>qubIT-repo</id>
-			<url>https://repository.qub-it.com/nexus/content/repositories/releases/</url>
+			<id>qubIT-oss</id>
+			<url>https://repository-oss.omnis.cloud/nexus/repository/releases/</url>
 		</repository>
 		<snapshotRepository>
-			<id>qubIT-repo</id>
-			<url>https://repository.qub-it.com/nexus/content/repositories/snapshots/</url>
+			<id>qubIT-oss</id>
+			<url>https://repository-oss.omnis.cloud/nexus/repository/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
