@@ -11,7 +11,7 @@
 
 	<groupId>com.qubit.terra</groupId>
 	<artifactId>qub-access-control</artifactId>
-	<version>1.8.2</version>
+	<version>1.9.0</version>
 	<packaging>jar</packaging>
 
 	<name>terra_qub-acess-control</name>
