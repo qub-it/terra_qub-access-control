@@ -47,7 +47,7 @@
 		<dependency>
 			<groupId>com.qubit.terra</groupId>
 			<artifactId>qub-foundation-core-api</artifactId>
-			<version>6.0.0</version>
+			<version>6.6.2</version>
 		</dependency>
 	</dependencies>
 
