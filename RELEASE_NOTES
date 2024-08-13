@@ -1,3 +1,5 @@
+- Improvement: Updates guava from 21.0 to 33.2.1-jre [#qubIT-Omnis-5869]
+
 2.0.0 (17-06-2024)
 - Improvement: Updates foundation core api version to 7.0.0 [#qubIT-Omnis-4737]
 
