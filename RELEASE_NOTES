@@ -1,3 +1,4 @@
+- Improvement: Ensures Release Notes is in the jar [#qubIT-Omnis-6579]
 - Improvement: Updates guava from 21.0 to 33.2.1-jre [#qubIT-Omnis-5869]
 
 2.0.0 (17-06-2024)
