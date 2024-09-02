@@ -1,3 +1,5 @@
+- Improvement: Upgrades parent [#qubIT-Omnis-6687]
+
 2.1.0 (02-09-2024)
 - Improvement: Ensures Release Notes is in the jar [#qubIT-Omnis-6579]
 - Improvement: Updates guava from 21.0 to 33.2.1-jre [#qubIT-Omnis-5869]
