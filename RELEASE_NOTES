@@ -1,3 +1,5 @@
+- New feature: Adds description field to AccessControlPermission and AccessControlProfile entities [#qubIT-Omnis-6987]
+
 2.3.0 (09-10-2024)
 - Refactor: Adds system field to AccessControlProfile entity and marks the locked field's getters and setters as deprecated [#qubIT-Omnis-6980]
 

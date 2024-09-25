@@ -96,6 +96,15 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
                 objectsClass, objectsProviderStrategy);
     }
 
+    public static AccessControlProfile create(String rawName, LocalizedString description, String code, String customExpression,
+            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
+            String objectsProviderStrategy) {
+        AccessControlProfile newAccessControlProfile = create(rawName, code, customExpression, customExpressionValidator,
+                restricted, system, objectsClass, objectsProviderStrategy);
+        newAccessControlProfile.setDescription(description);
+        return newAccessControlProfile;
+    }
+
     private void checkRules() {
         if (getDomainRoot() == null) {
             throw new IllegalStateException(AccessControlBundle.get("error.domainRoot.required"));

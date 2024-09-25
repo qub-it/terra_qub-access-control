@@ -64,7 +64,12 @@ public class AccessControlPermission extends AccessControlPermission_Base implem
         } else {
             throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlPermission.code.exists", code));
         }
+    }
 
+    public static AccessControlPermission create(String rawName, LocalizedString description, Boolean restricted, String code) {
+        AccessControlPermission newAccessControlPermission = create(rawName, restricted, code);
+        newAccessControlPermission.setDescription(description);
+        return newAccessControlPermission;
     }
 
     public static AccessControlPermission findByCode(String code) {
