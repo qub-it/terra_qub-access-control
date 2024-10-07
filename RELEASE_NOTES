@@ -1,3 +1,4 @@
+2.2.0 (07-10-2024)
 - Refactor: Removes locked field from AccessControlPermission entity [#qubIT-Omnis-6964]
 
 2.1.1 (02-09-2024)
