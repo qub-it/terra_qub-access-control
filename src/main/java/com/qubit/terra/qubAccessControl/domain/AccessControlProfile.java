@@ -153,14 +153,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         return getRestricted();
     }
 
-    // @Deprecated Boolean isLocked() will be replaced by Boolean isSystem()
+    // @Deprecated boolean isLocked() will be replaced by boolean isSystem()
     @Deprecated
-    public Boolean isLocked() {
-        return getSystem();
+    public boolean isLocked() {
+        return isSystem();
     }
 
-    public Boolean isSystem() {
-        return getSystem();
+    public boolean isSystem() {
+        return Boolean.TRUE.equals(getSystem());
     }
 
     // @Deprecated Boolean getLocked() will be replaced by Boolean getSystem()
