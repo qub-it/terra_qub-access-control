@@ -33,9 +33,10 @@ public class AccessControlPermission extends AccessControlPermission_Base implem
         setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
     }
 
-    protected AccessControlPermission(String rawName, Boolean restricted, String code) {
+    protected AccessControlPermission(String rawName, LocalizedString description, Boolean restricted, String code) {
         this();
         setRawName(rawName);
+        setDescription(description);
         setRestricted(restricted);
         setCode(code);
         checkRules();
@@ -58,13 +59,16 @@ public class AccessControlPermission extends AccessControlPermission_Base implem
         }
     }
 
-    public static AccessControlPermission create(String rawName, Boolean restricted, String code) {
+    public static AccessControlPermission create(String rawName, LocalizedString description, Boolean restricted, String code) {
         if (findByCode(code) == null) {
-            return new AccessControlPermission(rawName, restricted, code);
+            return new AccessControlPermission(rawName, description, restricted, code);
         } else {
             throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlPermission.code.exists", code));
         }
+    }
 
+    public static AccessControlPermission create(String rawName, Boolean restricted, String code) {
+        return create(rawName, new LocalizedString(), restricted, code);
     }
 
     public static AccessControlPermission findByCode(String code) {
