@@ -8,7 +8,8 @@ class AccessControlProfile  {
  String rawName (REQUIRED) ; 
  String code  (REQUIRED) ;
  Boolean restricted (REQUIRED) ; 
- Boolean locked (REQUIRED) ; 
+ Boolean locked ; // Deprecated
+ Boolean system ;
  String customExpressionValidator ;
  String customExpression ;
  String objectsClass ;
