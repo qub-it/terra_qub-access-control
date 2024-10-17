@@ -53,10 +53,12 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         setDomainRoot(pt.ist.fenixframework.FenixFramework.getDomainRoot());
     }
 
-    protected AccessControlProfile(String rawName, String code, String customExpression, String customExpressionValidator,
-            Boolean restricted, Boolean system, String objectsClass, String objectsProviderStrategy) {
+    protected AccessControlProfile(String rawName, LocalizedString description, String code, String customExpression,
+            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
+            String objectsProviderStrategy) {
         this();
         setRawName(rawName);
+        setDescription(description);
         setCode(code);
         setCustomExpression(customExpression);
         setCustomExpressionValidator(customExpressionValidator);
@@ -68,10 +70,12 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         PROFILE_CACHE.put(code, Optional.of(this));
     }
 
-    protected AccessControlProfile(String rawName, String customExpression, String customExpressionValidator, Boolean restricted,
-            Boolean system, String objectsClass, String objectsProviderStrategy) {
+    protected AccessControlProfile(String rawName, LocalizedString description, String customExpression,
+            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
+            String objectsProviderStrategy) {
         this();
         setRawName(rawName);
+        setDescription(description);
         setCode(UUID.randomUUID().toString());
         setCustomExpression(customExpression);
         setCustomExpressionValidator(customExpressionValidator);
@@ -83,16 +87,23 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         PROFILE_CACHE.put(getCode(), Optional.of(this));
     }
 
-    public static AccessControlProfile create(String rawName, String code, String customExpression,
+    public static AccessControlProfile create(String rawName, LocalizedString description, String code, String customExpression,
             String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
             String objectsProviderStrategy) {
         if (code == null) {
-            return new AccessControlProfile(rawName, customExpression, customExpressionValidator, restricted, system,
+            return new AccessControlProfile(rawName, description, customExpression, customExpressionValidator, restricted, system,
                     objectsClass, objectsProviderStrategy);
         } else if (findByCode(code) != null) {
             throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlProfile.code.exists", code));
         }
-        return new AccessControlProfile(rawName, code, customExpression, customExpressionValidator, restricted, system,
+        return new AccessControlProfile(rawName, description, code, customExpression, customExpressionValidator, restricted,
+                system, objectsClass, objectsProviderStrategy);
+    }
+
+    public static AccessControlProfile create(String rawName, String code, String customExpression,
+            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
+            String objectsProviderStrategy) {
+        return create(rawName, new LocalizedString(), code, customExpression, customExpressionValidator, restricted, system,
                 objectsClass, objectsProviderStrategy);
     }
 
