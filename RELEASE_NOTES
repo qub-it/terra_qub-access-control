@@ -1,3 +1,4 @@
+2.4.0 (17-10-2024)
 - New feature: Adds description field to AccessControlPermission and AccessControlProfile entities [#qubIT-Omnis-6987]
 
 2.3.0 (09-10-2024)
