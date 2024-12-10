@@ -1,3 +1,4 @@
+2.4.2 (10-12-2024)
 - Refactor: Removes code related to AccessControlProfile's deprecated locked attribute [#qubIT-Omnis-6993]
 - Refactor: Makes AccessControlProfile's system attribute required in the DML [#qubIT-Omnis-7160] 
 
