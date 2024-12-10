@@ -14,8 +14,7 @@ class AccessControlProfile  {
  String code  (REQUIRED) ;
  QubAccessControlLocalizedString description ;
  Boolean restricted (REQUIRED) ; 
- Boolean locked ; // Deprecated
- Boolean system ;
+ Boolean system (REQUIRED) ;
  String customExpressionValidator ;
  String customExpression ;
  String objectsClass ;
