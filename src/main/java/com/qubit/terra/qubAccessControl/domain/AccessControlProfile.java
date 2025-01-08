@@ -100,13 +100,6 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
                 system, objectsClass, objectsProviderStrategy);
     }
 
-    public static AccessControlProfile create(String rawName, String code, String customExpression,
-            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
-            String objectsProviderStrategy) {
-        return create(rawName, new LocalizedString(), code, customExpression, customExpressionValidator, restricted, system,
-                objectsClass, objectsProviderStrategy);
-    }
-
     private void checkRules() {
         if (getDomainRoot() == null) {
             throw new IllegalStateException(AccessControlBundle.get("error.domainRoot.required"));

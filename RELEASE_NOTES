@@ -1,3 +1,5 @@
+- Refactor: Removes unused create method that does not receive a description in AccessControlProfile [#qubIT-Omnis-7974]
+
 2.4.2 (10-12-2024)
 - Refactor: Removes code related to AccessControlProfile's deprecated locked attribute [#qubIT-Omnis-6993]
 - Refactor: Makes AccessControlProfile's system attribute required in the DML [#qubIT-Omnis-7160] 
