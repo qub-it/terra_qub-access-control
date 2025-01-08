@@ -20,19 +20,11 @@ public class ObjectProfilesCache {
             CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).build();
 //                    .expireAfterWrite(20, TimeUnit.MINUTES).build();
 
-    static final private Cache<Class, Set<AccessControlProfile>> ALL_OF_TYPE_OR_SUBTYPE_CACHE =
-            CacheBuilder.newBuilder().concurrencyLevel(Runtime.getRuntime().availableProcessors()).build();
-//                    .expireAfterWrite(20, TimeUnit.MINUTES).build();
-
     public static <T extends DomainObject> Set<AccessControlProfile> hasAccess(AccessControlPermission permission, T object) {
 
         Set<AccessControlProfile> profiles = new HashSet<>();
         try {
-            profiles = ALL_OF_TYPE_OR_SUBTYPE_CACHE.get(object.getClass(), () -> loadTypeCache(object.getClass()));
-
-            if (profiles.isEmpty()) {
-                profiles = CACHE.get(object, () -> loadCache(object));
-            }
+            profiles = CACHE.get(object, () -> loadCache(object));
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
@@ -57,7 +49,6 @@ public class ObjectProfilesCache {
 
         try {
             result.addAll(CACHE.get(object, () -> loadCache(object)));
-            result.addAll(ALL_OF_TYPE_OR_SUBTYPE_CACHE.get(object.getClass(), () -> loadTypeCache(object.getClass())));
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
@@ -87,39 +78,9 @@ public class ObjectProfilesCache {
         }
     }
 
-    public static <T extends DomainObject> void addToAllTypeOrSubtypeCache(Class<T> clazz, AccessControlProfile profile) {
-        Set<AccessControlProfile> cachedProfiles = ALL_OF_TYPE_OR_SUBTYPE_CACHE.getIfPresent(clazz);
-        if (cachedProfiles != null) {
-            cachedProfiles.add(profile);
-        } else {
-            cachedProfiles = new HashSet<>();
-            cachedProfiles.add(profile);
-            ALL_OF_TYPE_OR_SUBTYPE_CACHE.put(clazz, cachedProfiles);
-        }
-    }
-
-    public static <T extends DomainObject> void removeFromAllTypeOrSubtypeCache(Class<T> clazz, AccessControlProfile profile) {
-        Set<AccessControlProfile> cachedProfiles = ALL_OF_TYPE_OR_SUBTYPE_CACHE.getIfPresent(clazz);
-        if (cachedProfiles != null) {
-            cachedProfiles.remove(profile);
-
-            if (cachedProfiles.isEmpty()) {
-                ALL_OF_TYPE_OR_SUBTYPE_CACHE.invalidate(clazz);
-            }
-        }
-    }
-
     private static <T extends DomainObject> Set<AccessControlProfile> loadCache(T object) {
         return AccessControlProfile.findAll().stream()
                 .filter(profile -> object.getClass().equals(profile.getProviderClass()) && profile.containsObject(object))
-                .collect(Collectors.toSet());
-    }
-
-    private static <T extends DomainObject> Set<AccessControlProfile> loadTypeCache(Class<T> clazz) {
-        return AccessControlProfile.findAll().stream()
-                .filter(profile -> clazz.equals(profile.getProviderClass())
-                        && !"com.qubit.terra.qubAccessControl.domain.ProvideAssociatedStrategy"
-                                .equals(profile.getObjectsProviderStrategy()))
                 .collect(Collectors.toSet());
     }
 

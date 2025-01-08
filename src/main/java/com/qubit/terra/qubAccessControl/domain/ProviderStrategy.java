@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+@Deprecated
 public abstract class ProviderStrategy<T extends Object> {
 
     private static final Map<String, ProviderStrategy> PROVIDERS = new HashMap<String, ProviderStrategy>();

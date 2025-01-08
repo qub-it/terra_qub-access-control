@@ -118,19 +118,15 @@ public class AccessControlPermission extends AccessControlPermission_Base implem
     }
 
     public <T extends DomainObject> Set<T> provideObjects() {
-        return (Set<T>) getProfileSet().stream().flatMap(profile -> {
-            Set<DomainObject> provideObjects = profile.provideObjects();
-            return provideObjects.stream();
-        }).collect(Collectors.toSet());
+        return (Set<T>) getProfileSet().stream().flatMap(profile -> profile.provideObjects().stream())
+                .map(object -> (DomainObject) object).collect(Collectors.toSet());
     }
 
     public <T extends DomainObject> Set<T> provideObjects(Class<T> clazz) {
         return (Set<T>) getProfileSet().stream()
                 .filter(profile -> profile.getProviderClass() != null && profile.getProviderClass().isAssignableFrom(clazz))
-                .flatMap(profile -> {
-                    Set<DomainObject> provideObjects = profile.provideObjects();
-                    return provideObjects.stream();
-                }).collect(Collectors.toSet());
+                .flatMap(profile -> profile.provideObjects().stream()).map(object -> (DomainObject) object)
+                .collect(Collectors.toSet());
     }
 
     @Override
