@@ -3,6 +3,7 @@
 - Refactor: Makes ProviderStrategy abstract class deprecated [#qubIT-Omnis-8000]
 - Refactor: Removes ALL_OF_TYPE_OR_SUBTYPE_CACHE from ObjectProfilesCache class [#qubIT-Omnis-7914]
 - Refactor: Removes ObjectProfileCacheService [#qubIT-Omnis-7916]
+- Refactor: Creates new create method that does not receive the objectsProviderStrategy [#qubIT-Omnis-7921]
 
 2.4.2 (10-12-2024)
 - Refactor: Removes code related to AccessControlProfile's deprecated locked attribute [#qubIT-Omnis-6993]
