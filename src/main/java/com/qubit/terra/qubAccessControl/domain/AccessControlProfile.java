@@ -210,9 +210,9 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         Set<T> nonMatchingClassObjects =
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
-            Set<Object> finalObjects = provideObjects();
+            Set<DomainObject> finalObjects = provideObjects();
             finalObjects.addAll(objects);
-            setObjects(finalObjects.stream().map(o -> (DomainObject) o).collect(Collectors.toSet()));
+            setObjects(finalObjects);
             objects.forEach(object -> ObjectProfilesCache.addToCache(object, this));
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
@@ -234,9 +234,9 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             throw new IllegalStateException("No object class defined");
         }
         if (providerClass.isAssignableFrom(object.getClass())) {
-            Set<Object> objects = provideObjects();
+            Set<DomainObject> objects = provideObjects();
             objects.add(object);
-            setObjects(objects.stream().map(o -> (DomainObject) o).collect(Collectors.toSet()));
+            setObjects(objects);
             ObjectProfilesCache.addToCache(object, this);
         } else {
             throw new IllegalArgumentException("Expected to receive object of type " + providerClass.getName()
@@ -252,9 +252,9 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         Set<T> nonMatchingClassObjects =
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
-            Set<Object> finalObjects = provideObjects();
+            Set<DomainObject> finalObjects = provideObjects();
             finalObjects.removeAll(objects);
-            setObjects(finalObjects.stream().map(o -> (DomainObject) o).collect(Collectors.toSet()));
+            setObjects(finalObjects);
             objects.forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
@@ -277,9 +277,9 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             throw new IllegalStateException("No object class defined");
         }
         if (providerClass.isAssignableFrom(object.getClass())) {
-            Set<Object> objects = provideObjects();
+            Set<DomainObject> objects = provideObjects();
             objects.remove(object);
-            setObjects(objects.stream().map(o -> (DomainObject) o).collect(Collectors.toSet()));
+            setObjects(objects);
             ObjectProfilesCache.removeFromCache(object, this);
         } else {
             throw new IllegalArgumentException("Expected to receive object of type " + providerClass.getName()
@@ -314,10 +314,10 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         return result;
     }
 
-    public Set<Object> provideObjects() {
+    public <T extends Object> Set<T> provideObjects() {
         Set<DomainObject> cacheResult = new HashSet<>();
         Set<String> oidsToRemove = new HashSet<>();
-        Set<Object> result = new HashSet<>();
+        Set<T> result = new HashSet<>();
         try {
             cacheResult.addAll((Collection<? extends DomainObject>) CACHE.get(this, () -> parseObjectsJSON()));
         } catch (ExecutionException e) {
@@ -332,9 +332,8 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         // Daniel Pires - 29 April 2020
         //
         cacheResult.stream().forEach(object -> {
-
             if (isObjectValid(object)) {
-                result.add(object);
+                result.add((T) object);
             } else {
                 oidsToRemove.add(object.getExternalId());
             }
@@ -479,8 +478,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             return;
         }
 
-        provideObjects().stream().map(object -> (DomainObject) object)
-                .forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
+        provideObjects().stream().forEach(object -> ObjectProfilesCache.removeFromCache((DomainObject) object, this));
     }
 
     public void addToObjectsCache() {
@@ -488,8 +486,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             return;
         }
 
-        provideObjects().stream().map(object -> (DomainObject) object)
-                .forEach(object -> ObjectProfilesCache.addToCache(object, this));
+        provideObjects().stream().forEach(object -> ObjectProfilesCache.addToCache((DomainObject) object, this));
     }
 
     @Override
