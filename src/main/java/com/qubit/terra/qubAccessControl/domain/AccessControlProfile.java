@@ -293,7 +293,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     }
 
     public <T extends DomainObject> Boolean containsObject(T object) {
-        return provideObjects().contains(object);
+        return parseObjectsJSONToStringArray().contains(object.getExternalId());
     }
 
     private Set<String> parseObjectsJSONToStringArray() {
