@@ -28,7 +28,6 @@ import com.qubit.terra.framework.services.accessControl.Profile;
 import com.qubit.terra.framework.services.context.ApplicationUser;
 import com.qubit.terra.framework.services.versioning.VersioningInformationReader;
 import com.qubit.terra.framework.tools.primitives.LocalizedString;
-import com.qubit.terra.qubAccessControl.services.ObjectProfileCacheService;
 import com.qubit.terra.qubAccessControl.servlet.AccessControlBundle;
 
 import pt.ist.fenixframework.Atomic;
@@ -54,8 +53,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     }
 
     protected AccessControlProfile(String rawName, LocalizedString description, String code, String customExpression,
-            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
-            String objectsProviderStrategy) {
+            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass) {
         this();
         setRawName(rawName);
         setDescription(description);
@@ -65,14 +63,12 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         setRestricted(restricted);
         setSystem(system);
         setObjectsClass(objectsClass);
-        setObjectsProviderStrategy(objectsProviderStrategy);
         checkRules();
         PROFILE_CACHE.put(code, Optional.of(this));
     }
 
     protected AccessControlProfile(String rawName, LocalizedString description, String customExpression,
-            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
-            String objectsProviderStrategy) {
+            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass) {
         this();
         setRawName(rawName);
         setDescription(description);
@@ -82,29 +78,27 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         setRestricted(restricted);
         setSystem(system);
         setObjectsClass(objectsClass);
-        setObjectsProviderStrategy(objectsProviderStrategy);
         checkRules();
         PROFILE_CACHE.put(getCode(), Optional.of(this));
     }
 
+    @Deprecated
     public static AccessControlProfile create(String rawName, LocalizedString description, String code, String customExpression,
             String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
             String objectsProviderStrategy) {
+        return create(rawName, description, code, customExpression, customExpressionValidator, restricted, system, objectsClass);
+    }
+
+    public static AccessControlProfile create(String rawName, LocalizedString description, String code, String customExpression,
+            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass) {
         if (code == null) {
             return new AccessControlProfile(rawName, description, customExpression, customExpressionValidator, restricted, system,
-                    objectsClass, objectsProviderStrategy);
+                    objectsClass);
         } else if (findByCode(code) != null) {
             throw new IllegalArgumentException(AccessControlBundle.get("error.AccessControlProfile.code.exists", code));
         }
         return new AccessControlProfile(rawName, description, code, customExpression, customExpressionValidator, restricted,
-                system, objectsClass, objectsProviderStrategy);
-    }
-
-    public static AccessControlProfile create(String rawName, String code, String customExpression,
-            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
-            String objectsProviderStrategy) {
-        return create(rawName, new LocalizedString(), code, customExpression, customExpressionValidator, restricted, system,
-                objectsClass, objectsProviderStrategy);
+                system, objectsClass);
     }
 
     private void checkRules() {
@@ -216,7 +210,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         Set<T> nonMatchingClassObjects =
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
-            Set<T> finalObjects = provideObjects();
+            Set<DomainObject> finalObjects = provideObjects();
             finalObjects.addAll(objects);
             setObjects(finalObjects);
             objects.forEach(object -> ObjectProfilesCache.addToCache(object, this));
@@ -240,7 +234,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             throw new IllegalStateException("No object class defined");
         }
         if (providerClass.isAssignableFrom(object.getClass())) {
-            Set<T> objects = provideObjects();
+            Set<DomainObject> objects = provideObjects();
             objects.add(object);
             setObjects(objects);
             ObjectProfilesCache.addToCache(object, this);
@@ -258,7 +252,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         Set<T> nonMatchingClassObjects =
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
-            Set<T> finalObjects = provideObjects();
+            Set<DomainObject> finalObjects = provideObjects();
             finalObjects.removeAll(objects);
             setObjects(finalObjects);
             objects.forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
@@ -298,17 +292,8 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         throw new UnsupportedOperationException("Default method is disabled please use provideObjects().");
     }
 
-    protected ProviderStrategy getProvider() {
-        return ProviderStrategy.getProvider(getObjectsProviderStrategy());
-    }
-
     public <T extends DomainObject> Boolean containsObject(T object) {
-        if ("com.qubit.terra.qubAccessControl.domain.ProvideAssociatedStrategy".equals(getObjectsProviderStrategy())) {
-            return parseObjectsJSONToStringArray().contains(object.getExternalId());
-        } else {
-            ProviderStrategy provider = getProvider();
-            return provider != null ? provider.contains(this, object) : false;
-        }
+        return parseObjectsJSONToStringArray().contains(object.getExternalId());
     }
 
     private Set<String> parseObjectsJSONToStringArray() {
@@ -330,21 +315,13 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     }
 
     public <T extends Object> Set<T> provideObjects() {
-        ProviderStrategy provider = getProvider();
-        if (provider == null) {
-            return new HashSet<>();
-        }
-        return provider.provideAll(this);
-    }
-
-    protected <T extends DomainObject> Set<T> internalProvideObjects() {
-        Set<T> cacheResult = new HashSet<>();
-        Set<T> result = new HashSet<>();
+        Set<DomainObject> cacheResult = new HashSet<>();
         Set<String> oidsToRemove = new HashSet<>();
+        Set<T> result = new HashSet<>();
         try {
-            cacheResult.addAll((Collection<? extends T>) CACHE.get(this, () -> parseObjectsJSON()));
+            cacheResult.addAll((Collection<? extends DomainObject>) CACHE.get(this, () -> parseObjectsJSON()));
         } catch (ExecutionException e) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
 
         // We are checking if the object is valid because we
@@ -355,9 +332,8 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         // Daniel Pires - 29 April 2020
         //
         cacheResult.stream().forEach(object -> {
-
             if (isObjectValid(object)) {
-                result.add(object);
+                result.add((T) object);
             } else {
                 oidsToRemove.add(object.getExternalId());
             }
@@ -497,41 +473,20 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         addToObjectsCache();
     }
 
-    @Override
-    public void setObjectsProviderStrategy(String objectsProviderStrategy) {
-        removeFromObjectsCache();
-        super.setObjectsProviderStrategy(objectsProviderStrategy);
-        addToObjectsCache();
-    }
-
     public void removeFromObjectsCache() {
-        if (getProviderClass() == null || getObjectsProviderStrategy() == null) {
+        if (getProviderClass() == null) {
             return;
         }
 
-        if ("com.qubit.terra.qubAccessControl.domain.ProvideAssociatedStrategy".equals(getObjectsProviderStrategy())) {
-            Set<DomainObject> objects = provideObjects();
-            objects.forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
-        } else {
-            ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(getProviderClass(), this);
-            ObjectProfileCacheService.getAllSubClasses(getProviderClass())
-                    .forEach(clazz -> ObjectProfilesCache.removeFromAllTypeOrSubtypeCache(clazz, this));
-        }
+        provideObjects().stream().forEach(object -> ObjectProfilesCache.removeFromCache((DomainObject) object, this));
     }
 
     public void addToObjectsCache() {
-        if (getProviderClass() == null || getObjectsProviderStrategy() == null) {
+        if (getProviderClass() == null) {
             return;
         }
 
-        if ("com.qubit.terra.qubAccessControl.domain.ProvideAssociatedStrategy".equals(getObjectsProviderStrategy())) {
-            Set<DomainObject> objects = provideObjects();
-            objects.forEach(object -> ObjectProfilesCache.addToCache(object, this));
-        } else {
-            ObjectProfilesCache.addToAllTypeOrSubtypeCache(getProviderClass(), this);
-            ObjectProfileCacheService.getAllSubClasses(getProviderClass())
-                    .forEach(clazz -> ObjectProfilesCache.addToAllTypeOrSubtypeCache(clazz, this));
-        }
+        provideObjects().stream().forEach(object -> ObjectProfilesCache.addToCache((DomainObject) object, this));
     }
 
     @Override
