@@ -82,13 +82,6 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         PROFILE_CACHE.put(getCode(), Optional.of(this));
     }
 
-    @Deprecated
-    public static AccessControlProfile create(String rawName, LocalizedString description, String code, String customExpression,
-            String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass,
-            String objectsProviderStrategy) {
-        return create(rawName, description, code, customExpression, customExpressionValidator, restricted, system, objectsClass);
-    }
-
     public static AccessControlProfile create(String rawName, LocalizedString description, String code, String customExpression,
             String customExpressionValidator, Boolean restricted, Boolean system, String objectsClass) {
         if (code == null) {
