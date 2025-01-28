@@ -1,3 +1,5 @@
+- Refactor: Moves bundles into "bundle" directory [#qubIT-Omnis-8420]
+
 2.5.0 (20-01-2025)
 - Refactor: Removes unused create method that does not receive a description in AccessControlProfile [#qubIT-Omnis-7974]
 - Refactor: Removes ObjectProviderStrategy field from AccessControlProfile entity [#qubIT-Omnis-7054]
