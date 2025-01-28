@@ -1,3 +1,5 @@
+- Refactor: Moves bundles into "bundle" directory [#qubIT-Omnis-8420]
+
 2.5.1 (30-01-2025)
 - Refactor: Removes ProviderStrategy class [#qubIT-Omnis-7913]
 - Refactor: Removes deprecated create method in AccessControlProfile [#qubIT-Omnis-7975]
