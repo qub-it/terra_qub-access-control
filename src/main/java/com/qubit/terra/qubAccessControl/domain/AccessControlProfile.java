@@ -108,7 +108,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         }
 
         if (getRestricted() == null) {
-            throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.manager.required"));
+            throw new IllegalStateException(AccessControlBundle.get("error.AccessControlProfile.restricted.required"));
         }
 
         if (getSystem() == null) {
