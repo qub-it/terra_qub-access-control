@@ -7,8 +7,8 @@ import org.apache.commons.lang.LocaleUtils;
 
 public class AccessControlBundle {
 
-	private static final String BUNDLE_NAME = "resources.AccesscontrolResources";
-	private static ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);
+    private static final String BUNDLE_NAME = "bundle.AccesscontrolResources";
+    private static ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);
 
 	public static String get(String key) {
 		return bundle.getString(key);
