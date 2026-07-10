@@ -1,3 +1,5 @@
+- New feature: Adds logging to interactions with Access Control entities feature [#qubIT-Omnis-11097]
+
 2.5.2 (13-02-2025)
 - Refactor: Moves bundles into "bundle" directory [#qubIT-Omnis-8420]
 - Improvement: Creates bundle for the en local and turns the default bundle into a symbolic link to this bundle [#qubIT-Omnis-8419]

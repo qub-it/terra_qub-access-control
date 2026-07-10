@@ -32,9 +32,9 @@ class AccessControlAuditLog  {
  String actionType (REQUIRED) ;
  String actorUsername (REQUIRED) ;
  String actorName (REQUIRED) ;
- String targetDescription (REQUIRED) ;
- String targetIdentifier;
- Long timestamp (REQUIRED);
+ String target (REQUIRED) ;
+ String targetIdentifier (REQUIRED) ;
+ DateTime logDate (REQUIRED);
 }
 
 relation DomainRootprofilesAccessControlProfile {
@@ -52,6 +52,13 @@ relation DomainRootprofileTypesAccessControlProfileType {
 relation DomainRootOperationPermissionsAccessControlPermission {
 	AccessControlPermission playsRole permissions{
 		multiplicity *;	
+	}
+	.pt.ist.fenixframework.DomainRoot playsRole domainRoot;
+}
+
+relation DomainRootAccessControlAuditLog {
+	AccessControlAuditLog playsRole accessControlAuditLogs {
+		multiplicity *;
 	}
 	.pt.ist.fenixframework.DomainRoot playsRole domainRoot;
 }
@@ -88,7 +95,9 @@ relation ProfileAuditLogRelation {
 	AccessControlAuditLog playsRole auditLogs {
 		multiplicity *;
 	}
-	AccessControlProfile playsRole profile;
+	AccessControlProfile playsRole profile {
+	    multiplicity 1..1;
+	}
 }
 
 
