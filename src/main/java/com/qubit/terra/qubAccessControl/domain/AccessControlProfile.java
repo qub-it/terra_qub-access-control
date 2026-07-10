@@ -206,7 +206,11 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             Set<DomainObject> finalObjects = provideObjects();
             finalObjects.addAll(objects);
             setObjects(finalObjects);
-            objects.forEach(object -> ObjectProfilesCache.addToCache(object, this));
+            objects.forEach(object -> {
+                ObjectProfilesCache.addToCache(object, this);
+                AccessControlAuditLog.log(this, AccessControlAuditLog.OBJECT_ADDED,
+                        object.getExternalId(), object.getExternalId());
+            });
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
@@ -248,7 +252,11 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             Set<DomainObject> finalObjects = provideObjects();
             finalObjects.removeAll(objects);
             setObjects(finalObjects);
-            objects.forEach(object -> ObjectProfilesCache.removeFromCache(object, this));
+            objects.forEach(object -> {
+                ObjectProfilesCache.removeFromCache(object, this);
+                AccessControlAuditLog.log(this, AccessControlAuditLog.OBJECT_REMOVED,
+                        object.getExternalId(), object.getExternalId());
+            });
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
@@ -397,16 +405,24 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
                     + getParentSet().stream().map(profile -> profile.getRawName()).collect(Collectors.joining(",")));
         }
 
-        getMembers().forEach(u -> this.removeMember(u));
-        removeFromObjectsCache();
+        getAuditLogsSet().forEach(log -> log.delete());
 
-        getChildSet().forEach(child -> removeChild(child));
-        getPermissionSet().forEach(permission -> removePermission(permission));
+        AccessControlAuditLog.suppressAudit();
 
-        setDomainRoot(null);
+        try {
+            getMembers().forEach(u -> this.removeMember(u));
+            removeFromObjectsCache();
 
-        PROFILE_CACHE.invalidate(getCode());
-        super.deleteDomainObject();
+            getChildSet().forEach(child -> removeChild(child));
+            getPermissionSet().forEach(permission -> removePermission(permission));
+
+            setDomainRoot(null);
+
+            PROFILE_CACHE.invalidate(getCode());
+            super.deleteDomainObject();
+        } finally {
+            AccessControlAuditLog.resumeAudit();
+        }
     }
 
     @Override
@@ -420,7 +436,19 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     public void addChild(AccessControlProfile child) {
         if (validate(child)) {
             super.addChild(child);
+            AccessControlAuditLog.log(this, AccessControlAuditLog.CHILD_PROFILE_ADDED,
+                    child.getRawName(), child.getCode());
+            AccessControlAuditLog.log(child, AccessControlAuditLog.PARENT_PROFILE_ADDED,
+                    this.getRawName(), this.getCode());
         }
+    }
+
+    public void removeChild(AccessControlProfile child) {
+        super.removeChild(child);
+        AccessControlAuditLog.log(this, AccessControlAuditLog.CHILD_PROFILE_REMOVED,
+                child.getRawName(), child.getCode());
+        AccessControlAuditLog.log(child, AccessControlAuditLog.PARENT_PROFILE_REMOVED,
+                this.getRawName(), this.getCode());
     }
 
     private boolean validate(AccessControlProfile child) {
@@ -510,6 +538,20 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     @Override
     public DateTime getCreationDate() {
         return ServiceProvider.getService(VersioningInformationReader.class).getCreationDate(this);
+    }
+
+    @Override
+    public void addPermission(AccessControlPermission permission) {
+        super.addPermission(permission);
+        AccessControlAuditLog.log(this, AccessControlAuditLog.PERMISSION_ADDED,
+                permission.getRawName(), permission.getCode());
+    }
+
+    @Override
+    public void removePermission(AccessControlPermission permission) {
+        super.removePermission(permission);
+        AccessControlAuditLog.log(this, AccessControlAuditLog.PERMISSION_REMOVED,
+                permission.getRawName(), permission.getCode());
     }
 
     @Override

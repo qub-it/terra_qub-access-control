@@ -29,6 +29,10 @@ public class AccessControlAuditLog extends AccessControlAuditLog_Base {
         return Boolean.TRUE.equals(auditEnabled.get());
     }
 
+    public void delete() {
+        super.deleteDomainObject();
+    }
+
     public static void log(AccessControlProfile profile, String actionType, String targetDescription,
             String targetIdentifier) {
         if (!isAuditEnabled()) {
