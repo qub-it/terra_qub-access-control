@@ -208,7 +208,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             setObjects(finalObjects);
             objects.forEach(object -> {
                 ObjectProfilesCache.addToCache(object, this);
-                AccessControlAuditLog.log(this, AccessControlAuditLog.OBJECT_ADDED, object.getClass().getSimpleName(),
+                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, object.getClass().getSimpleName(),
                         object.getExternalId());
             });
         } else {
@@ -235,7 +235,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             objects.add(object);
             setObjects(objects);
             ObjectProfilesCache.addToCache(object, this);
-            AccessControlAuditLog.log(this, AccessControlAuditLog.OBJECT_ADDED, object.getClass().getSimpleName(),
+            AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, object.getClass().getSimpleName(),
                     object.getExternalId());
         } else {
             throw new IllegalArgumentException(
@@ -257,7 +257,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             setObjects(finalObjects);
             objects.forEach(object -> {
                 ObjectProfilesCache.removeFromCache(object, this);
-                AccessControlAuditLog.log(this, AccessControlAuditLog.OBJECT_REMOVED, object.getClass().getSimpleName(),
+                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, object.getClass().getSimpleName(),
                         object.getExternalId());
             });
         } else {
@@ -285,7 +285,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
             objects.remove(object);
             setObjects(objects);
             ObjectProfilesCache.removeFromCache(object, this);
-            AccessControlAuditLog.log(this, AccessControlAuditLog.OBJECT_REMOVED, object.getClass().getSimpleName(),
+            AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, object.getClass().getSimpleName(),
                     object.getExternalId());
         } else {
             throw new IllegalArgumentException(
@@ -412,7 +412,7 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         }
 
         getChildSet().forEach(
-                child -> AccessControlAuditLog.log(child, AccessControlAuditLog.PARENT_PROFILE_REMOVED, this.getRawName(),
+                child -> AccessControlAuditLog.log(child, AccessControlAuditLogType.PARENT_PROFILE_REMOVED, this.getRawName(),
                         this.getExternalId()));
 
         AccessControlAuditLog.suppressAudit();
@@ -446,16 +446,20 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     public void addChild(AccessControlProfile child) {
         if (validate(child)) {
             super.addChild(child);
-            AccessControlAuditLog.log(this, AccessControlAuditLog.CHILD_PROFILE_ADDED, child.getRawName(), child.getExternalId());
-            AccessControlAuditLog.log(child, AccessControlAuditLog.PARENT_PROFILE_ADDED, this.getRawName(), this.getExternalId());
+            AccessControlAuditLog.log(this, AccessControlAuditLogType.CHILD_PROFILE_ADDED, child.getRawName(),
+                    child.getExternalId());
+            AccessControlAuditLog.log(child, AccessControlAuditLogType.PARENT_PROFILE_ADDED, this.getRawName(),
+                    this.getExternalId());
         }
     }
 
     @Override
     public void removeChild(AccessControlProfile child) {
         super.removeChild(child);
-        AccessControlAuditLog.log(this, AccessControlAuditLog.CHILD_PROFILE_REMOVED, child.getRawName(), child.getExternalId());
-        AccessControlAuditLog.log(child, AccessControlAuditLog.PARENT_PROFILE_REMOVED, this.getRawName(), this.getExternalId());
+        AccessControlAuditLog.log(this, AccessControlAuditLogType.CHILD_PROFILE_REMOVED, child.getRawName(),
+                child.getExternalId());
+        AccessControlAuditLog.log(child, AccessControlAuditLogType.PARENT_PROFILE_REMOVED, this.getRawName(),
+                this.getExternalId());
     }
 
     private boolean validate(AccessControlProfile child) {
@@ -550,14 +554,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     @Override
     public void addPermission(AccessControlPermission permission) {
         super.addPermission(permission);
-        AccessControlAuditLog.log(this, AccessControlAuditLog.PERMISSION_ADDED, permission.getRawName(),
+        AccessControlAuditLog.log(this, AccessControlAuditLogType.PERMISSION_ADDED, permission.getRawName(),
                 permission.getExternalId());
     }
 
     @Override
     public void removePermission(AccessControlPermission permission) {
         super.removePermission(permission);
-        AccessControlAuditLog.log(this, AccessControlAuditLog.PERMISSION_REMOVED, permission.getRawName(),
+        AccessControlAuditLog.log(this, AccessControlAuditLogType.PERMISSION_REMOVED, permission.getRawName(),
                 permission.getExternalId());
     }
 
