@@ -204,13 +204,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
             Set<DomainObject> finalObjects = provideObjects();
-            finalObjects.addAll(objects);
-            setObjects(finalObjects);
-            objects.forEach(object -> {
-                ObjectProfilesCache.addToCache(object, this);
-                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, object.getClass().getSimpleName(),
-                        object.getExternalId());
+            objects.forEach(o -> {
+                if (finalObjects.add(o)) {
+                    ObjectProfilesCache.addToCache(o, this);
+                    AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, o.getClass().getSimpleName(),
+                            o.getExternalId());
+                }
             });
+            setObjects(finalObjects);
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
@@ -232,11 +233,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         }
         if (providerClass.isAssignableFrom(object.getClass())) {
             Set<DomainObject> objects = provideObjects();
+            int initialObjectCount = objects.size();
             objects.add(object);
-            setObjects(objects);
-            ObjectProfilesCache.addToCache(object, this);
-            AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, object.getClass().getSimpleName(),
-                    object.getExternalId());
+            if (objects.size() != initialObjectCount) {
+                setObjects(objects);
+                ObjectProfilesCache.addToCache(object, this);
+                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, object.getClass().getSimpleName(),
+                        object.getExternalId());
+            }
         } else {
             throw new IllegalArgumentException(
                     "Expected to receive object of type " + providerClass.getName() + " but received object of type "
@@ -253,13 +257,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
             Set<DomainObject> finalObjects = provideObjects();
-            finalObjects.removeAll(objects);
-            setObjects(finalObjects);
-            objects.forEach(object -> {
-                ObjectProfilesCache.removeFromCache(object, this);
-                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, object.getClass().getSimpleName(),
-                        object.getExternalId());
+            objects.forEach(o -> {
+                if (finalObjects.remove(o)) {
+                    ObjectProfilesCache.removeFromCache(o, this);
+                    AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, o.getClass().getSimpleName(),
+                            o.getExternalId());
+                }
             });
+            setObjects(finalObjects);
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
@@ -282,11 +287,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
         }
         if (providerClass.isAssignableFrom(object.getClass())) {
             Set<DomainObject> objects = provideObjects();
+            int initialObjectCount = objects.size();
             objects.remove(object);
-            setObjects(objects);
-            ObjectProfilesCache.removeFromCache(object, this);
-            AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, object.getClass().getSimpleName(),
-                    object.getExternalId());
+            if (objects.size() != initialObjectCount) {
+                setObjects(objects);
+                ObjectProfilesCache.removeFromCache(object, this);
+                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, object.getClass().getSimpleName(),
+                        object.getExternalId());
+            }
         } else {
             throw new IllegalArgumentException(
                     "Expected to receive object of type " + providerClass.getName() + " but received object of type "
@@ -445,21 +453,27 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
     @Override
     public void addChild(AccessControlProfile child) {
         if (validate(child)) {
+            int initialChildCount = getChildSet().size();
             super.addChild(child);
-            AccessControlAuditLog.log(this, AccessControlAuditLogType.CHILD_PROFILE_ADDED, child.getRawName(),
-                    child.getExternalId());
-            AccessControlAuditLog.log(child, AccessControlAuditLogType.PARENT_PROFILE_ADDED, this.getRawName(),
-                    this.getExternalId());
+            if (getChildSet().size() != initialChildCount) {
+                AccessControlAuditLog.log(this, AccessControlAuditLogType.CHILD_PROFILE_ADDED, child.getRawName(),
+                        child.getExternalId());
+                AccessControlAuditLog.log(child, AccessControlAuditLogType.PARENT_PROFILE_ADDED, this.getRawName(),
+                        this.getExternalId());
+            }
         }
     }
 
     @Override
     public void removeChild(AccessControlProfile child) {
+        int initialChildCount = getChildSet().size();
         super.removeChild(child);
-        AccessControlAuditLog.log(this, AccessControlAuditLogType.CHILD_PROFILE_REMOVED, child.getRawName(),
-                child.getExternalId());
-        AccessControlAuditLog.log(child, AccessControlAuditLogType.PARENT_PROFILE_REMOVED, this.getRawName(),
-                this.getExternalId());
+        if (getChildSet().size() != initialChildCount) {
+            AccessControlAuditLog.log(this, AccessControlAuditLogType.CHILD_PROFILE_REMOVED, child.getRawName(),
+                    child.getExternalId());
+            AccessControlAuditLog.log(child, AccessControlAuditLogType.PARENT_PROFILE_REMOVED, this.getRawName(),
+                    this.getExternalId());
+        }
     }
 
     private boolean validate(AccessControlProfile child) {
@@ -553,16 +567,22 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
 
     @Override
     public void addPermission(AccessControlPermission permission) {
+        int initialPermissionCount = getPermissionSet().size();
         super.addPermission(permission);
-        AccessControlAuditLog.log(this, AccessControlAuditLogType.PERMISSION_ADDED, permission.getRawName(),
-                permission.getExternalId());
+        if (getPermissionSet().size() != initialPermissionCount) {
+            AccessControlAuditLog.log(this, AccessControlAuditLogType.PERMISSION_ADDED, permission.getRawName(),
+                    permission.getExternalId());
+        }
     }
 
     @Override
     public void removePermission(AccessControlPermission permission) {
+        int initialPermissionCount = getPermissionSet().size();
         super.removePermission(permission);
-        AccessControlAuditLog.log(this, AccessControlAuditLogType.PERMISSION_REMOVED, permission.getRawName(),
-                permission.getExternalId());
+        if (getPermissionSet().size() != initialPermissionCount) {
+            AccessControlAuditLog.log(this, AccessControlAuditLogType.PERMISSION_REMOVED, permission.getRawName(),
+                    permission.getExternalId());
+        }
     }
 
     @Override
