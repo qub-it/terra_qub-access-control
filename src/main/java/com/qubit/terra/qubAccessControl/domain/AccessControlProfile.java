@@ -204,14 +204,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
             Set<DomainObject> finalObjects = provideObjects();
-            Set<T> objectsToAdd = objects.stream().filter(o -> !finalObjects.contains(o)).collect(Collectors.toSet());
-            finalObjects.addAll(objectsToAdd);
-            setObjects(finalObjects);
-            objectsToAdd.forEach(object -> {
-                ObjectProfilesCache.addToCache(object, this);
-                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, object.getClass().getSimpleName(),
-                        object.getExternalId());
+            objects.forEach(o -> {
+                if (finalObjects.add(o)) {
+                    ObjectProfilesCache.addToCache(o, this);
+                    AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_ADDED, o.getClass().getSimpleName(),
+                            o.getExternalId());
+                }
             });
+            setObjects(finalObjects);
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
@@ -257,14 +257,14 @@ public class AccessControlProfile extends AccessControlProfile_Base implements P
                 objects.parallelStream().filter(o -> !providerClass.isAssignableFrom(o.getClass())).collect(Collectors.toSet());
         if (nonMatchingClassObjects.isEmpty()) {
             Set<DomainObject> finalObjects = provideObjects();
-            Set<T> objectsToRemove = objects.stream().filter(finalObjects::contains).collect(Collectors.toSet());
-            finalObjects.removeAll(objectsToRemove);
-            setObjects(finalObjects);
-            objectsToRemove.forEach(object -> {
-                ObjectProfilesCache.removeFromCache(object, this);
-                AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, object.getClass().getSimpleName(),
-                        object.getExternalId());
+            objects.forEach(o -> {
+                if (finalObjects.remove(o)) {
+                    ObjectProfilesCache.removeFromCache(o, this);
+                    AccessControlAuditLog.log(this, AccessControlAuditLogType.OBJECT_REMOVED, o.getClass().getSimpleName(),
+                            o.getExternalId());
+                }
             });
+            setObjects(finalObjects);
         } else {
             throw new IllegalArgumentException("Expected to receive collection of objects of type " + providerClass.getName());
         }
