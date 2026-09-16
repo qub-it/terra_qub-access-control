@@ -1,3 +1,4 @@
+2.6.1 (16-09-2026)
 - Refactor: Adds idempotency guards to AccessControlAuditLog creation to prevent duplicate audit logs [#qubIT-Omnis-11528]
 
 2.6.0 (20-07-2026)
