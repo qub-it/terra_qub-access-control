@@ -1,3 +1,5 @@
+- Refactor: Migrate from javaee to jakarta [#qubIT-Omnis-10960]
+
 2.6.1 (16-09-2026)
 - Refactor: Adds idempotency guards to AccessControlAuditLog creation to prevent duplicate audit logs [#qubIT-Omnis-11528]
 
